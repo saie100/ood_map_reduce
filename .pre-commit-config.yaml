@@ -1,0 +1,19 @@
+fail_fast: false
+repos:
+- repo: local
+  hooks:
+  - id: clang-format
+    name: clang-format
+    entry: clang-format
+    language: system
+    files: \.(cpp|h|hpp|cxx)$
+    args:
+    - --style=file
+    - --fallback-style=Google
+  - id: cpplint
+    name: cpplint
+    entry: cpplint
+    language: system
+    files: \.(cpp|h|hpp|cxx)$
+    args:
+    - --filter=-build/include_order,-build/header_guard,-build/c++11,-build/namespaces
