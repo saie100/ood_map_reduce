@@ -24,7 +24,13 @@ class Reduce{
         */
         Reduce(string outputDir);
 
-        void redue(string key, list<int> intIterator);
+        void redue(string& key, list<int> intIterator);
+
+    private:
+
+        string output_dir;
+
+        void export_result(string& key, int value);
 };
 
 #endif
