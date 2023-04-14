@@ -28,6 +28,8 @@ void Reduce::redue(string& key, list<int> intIterator){
     for (int i: intIterator){
         sum += i;
     }
+
+    export_result(key, sum);
 }
 
 
