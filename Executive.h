@@ -13,10 +13,12 @@ using std::string;
 using std::vector;
 
 class Executive {
-
 public:
   // constructor
   Executive(int argument_count, char **argument_values);
+
+  // get argument value
+  vector<string> getArguments();
 
 private:
   /******* Members ******/
@@ -25,8 +27,8 @@ private:
 
   /***** Methods *****/
 
-  // sets argument array
-  void setArgumentArray(int count, char **values);
+  // sets argument value
+  void setArgumentValue(int argument_count, char **arguments);
 };
 
 #endif
