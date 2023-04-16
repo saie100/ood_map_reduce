@@ -4,27 +4,27 @@
  * CSE 687 Object Oriented Design in C++
  * Syracuse University
  * Project MapReduce
- * Copyright [2023] <Copyright Varis Nijat>
+ * Copyright [2023]
  **/
 
 #include "Reduce.h"
 
-#include <list>
+#include <vector>
 #include <string>
 
-using std::list;
+using std::vector;
 using std::string;
 
 /**
  * Class Constructor specifying output directory
  */
-Reduce::Reduce(string outputDir) { output_dir = outputDir; }
+Reduce::Reduce(string output_dir) { outputDir = output_dir; }
 
-void Reduce::redue(string key, list<int> intIterator) {
+void Reduce::redue(string key, vector<int> intIterator) {
   // Sum all the values in the list
   int sum = 0;
-  for (int i : intIterator) {
-    sum += i;
+  for (auto i=intIterator.begin(); i != intIterator.end(); i++) {
+    sum += *i;
   }
 
   export_result(key, sum);
