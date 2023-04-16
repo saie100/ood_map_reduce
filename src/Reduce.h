@@ -4,33 +4,31 @@
  * CSE 687 Object Oriented Design in C++
  * Syracuse University
  * Project MapReduce
-**/
+ * Copyright [2023] <Copyright Varis Nijat>
+ **/
 
 #ifndef REDUCE_H
 #define REDUCE_H
 
-#include <string>
 #include <list>
+#include <string>
 
-using std::string;
 using std::list;
+using std::string;
 
-class Reduce{
+class Reduce {
+ public:
+  /**
+   * Class Constructor
+   */
+  explicit Reduce(string outputDir);
 
-    public:
+  void redue(string key, list<int> intIterator);
 
-        /**
-         * Class Constructor 
-        */
-        Reduce(string outputDir);
+ private:
+  string output_dir;
 
-        void redue(string& key, list<int> intIterator);
-
-    private:
-
-        string output_dir;
-
-        void export_result(string& key, int value);
+  void export_result(string key, int value);
 };
 
 #endif

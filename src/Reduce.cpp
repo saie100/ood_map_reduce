@@ -20,7 +20,7 @@ using std::string;
  */
 Reduce::Reduce(string outputDir) { output_dir = outputDir; }
 
-void Reduce::redue(string& key, list<int> intIterator) {
+void Reduce::redue(string key, list<int> intIterator) {
   // Sum all the values in the list
   int sum = 0;
   for (int i : intIterator) {
@@ -30,4 +30,4 @@ void Reduce::redue(string& key, list<int> intIterator) {
   export_result(key, sum);
 }
 
-void Reduce::export_result(string& key, int value) {}
+void Reduce::export_result(string key, int value) {}
