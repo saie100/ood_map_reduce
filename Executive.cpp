@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "FileManager.h"
+
 using std::cin;
 using std::cout;
 using std::endl;
@@ -21,11 +23,13 @@ void Executive::setArgumentValue(int count, char **auguments) {
     cout << "Error: Please enter a directory path" << endl;
     exit(1);
   }
-  for (int i = 0; i < count; i++) {
-    argument_value.push_back(auguments[i]);
+  for (int i = 1; i < count; i++) {
+    if (FileManager::isValid("dir", auguments[i])) {
+      argument_value.push_back(auguments[i]);
+    }
   }
 };
 
 vector<string> Executive::getArguments() {
-  return vector<string>(argument_value.begin() + 1, argument_value.end());
+  return vector<string>(argument_value.begin(), argument_value.end());
 }

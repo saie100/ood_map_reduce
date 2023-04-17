@@ -13,14 +13,14 @@ using std::string;
 using std::vector;
 
 class Executive {
-public:
+ public:
   // constructor
   Executive(int argument_count, char **argument_values);
 
   // get argument value
   vector<string> getArguments();
 
-private:
+ private:
   /******* Members ******/
   int argument_count;
   vector<string> argument_value;

@@ -14,21 +14,30 @@ using std::string;
 using std::vector;
 
 class FileManager {
-public:
+ public:
   // constructor
   FileManager();
 
   // returns true if directory exists. Else returns false
-  bool isValid(string path);
+  static bool isValid(string type, string path);
+
+  // returns filename given a path to a file
+  string getFilename(string path);
 
   // returns an array of string. First index is the name of the file
   // the second index is the content of the file
   array<string, 2> readFile(string input_path);
 
-  // returns true if file was successfully written to path. Else returns false
-  bool writeFile(string output_path, string content);
+  // returns true if file was successfully written to output_dir. Else returns
+  // false
+  bool writeFile(string mode, string output_dir, string filename,
+                 string content);
 
-private:
+  // returns a list of files inside a directory
+  // parameter dir_path is the path to a directory
+  vector<string> getFilesFromDir(string dir_path);
+
+ private:
 };
 
 #endif
