@@ -9,11 +9,11 @@
 
 #include "Reduce.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
-using std::vector;
 using std::string;
+using std::vector;
 
 /**
  * Class Constructor specifying output directory
@@ -23,7 +23,7 @@ Reduce::Reduce(string output_dir) { outputDir = output_dir; }
 void Reduce::redue(string key, vector<int> intIterator) {
   // Sum all the values in the list
   int sum = 0;
-  for (auto i=intIterator.begin(); i != intIterator.end(); i++) {
+  for (auto i = intIterator.begin(); i != intIterator.end(); i++) {
     sum += *i;
   }
 
