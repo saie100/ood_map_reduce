@@ -4,10 +4,11 @@ Accepts raw data from a file, removes whitespace, punctuation, and capitalizatio
 Periodically outputs data to a temporary file.
 */
 
-#include "Map.hpp"
+#include "headers/Map.hpp"
 #include <cctype>
 #include <algorithm>
 
+#define TEST_STUB
 #ifdef TEST_STUB
 #include <iostream>
 using std::cout;
