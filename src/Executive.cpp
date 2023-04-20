@@ -1,11 +1,10 @@
-#include "Executive.h"
+#include "headers/Executive.h"
+#include "headers/FileManager.h"
 
 #include <array>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "FileManager.h"
 
 using std::cin;
 using std::cout;
