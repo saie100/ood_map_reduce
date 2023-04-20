@@ -12,6 +12,7 @@
 
 using std::cin;
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::ifstream;
 using std::ios;
@@ -35,21 +36,21 @@ bool FileManager::isValid(string type, string path) {
       } else {
         return false;
       }
-    } else if (type == "dir") {
+    } 
+    else if (type == "dir") {
       if (sb.st_mode & S_IFDIR) {
         return true;
       } else {
         return false;
       }
-    } else {
-      cout << "Error: Please enter `file` or `dir` for `type` argument" << endl;
+    } 
+    else {
+      cerr << "Error: Please enter `file` or `dir` for `type` argument" << endl;
       exit(1);
-      return false;
     }
   } else {
-    cout << "Error Invalid Path: " << path << endl;
+    cerr << "Error Invalid Path: " << path << endl;
     exit(1);
-    return false;
   }
 };
 
@@ -172,7 +173,7 @@ vector<string> FileManager::getFilesFromDir(string dir_path) {
     return list;
 
   } else {
-    cout << "Error: Invalid Directory Path\n";
+    cerr << "Error: Invalid Directory Path\n";
     exit(1);
     return list;
   }
