@@ -18,7 +18,7 @@ using std::vector;
 /**
  * Class Constructor specifying output directory
  */
-Reduce::Reduce(string output_dir) { outputDir = output_dir; }
+Reduce::Reduce(string output_dir):outputDir(output_dir){}
 
 void Reduce::reduce(string key, vector<int> intIterator) {
   // Sum all the values in the list
