@@ -26,16 +26,16 @@ class FileManager {
 
   // returns an array of string. First index is the name of the file
   // the second index is the content of the file
-  array<string, 2> readFile(string input_path);
+  array<string, 2> readFile(string inputPath);
 
   // returns true if file was successfully written to output_dir. Else returns
   // false
-  bool writeFile(string mode, string output_dir, string filename,
+  bool writeFile(string mode, string outputDir, string filename,
                  string content);
 
   // returns a list of files inside a directory
   // parameter dir_path is the path to a directory
-  vector<string> getFilesFromDir(string dir_path);
+  vector<string> getFilesFromDir(string dirPath);
 
  private:
 };

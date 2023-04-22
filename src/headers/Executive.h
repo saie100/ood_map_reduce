@@ -15,20 +15,20 @@ using std::vector;
 class Executive {
  public:
   // constructor
-  Executive(int argument_count, char **argument_values);
+  Executive(int argumentCount, char **arguments);
 
   // get argument value
   vector<string> getArguments();
 
  private:
   /******* Members ******/
-  int argument_count;
-  vector<string> argument_value;
+  int argumentCount;
+  vector<string> arguments;
 
   /***** Methods *****/
 
   // sets argument value
-  void setArgumentValue(int argument_count, char **arguments);
+  void setArgumentValue(int argumentCount, char **arguments);
 };
 
 #endif

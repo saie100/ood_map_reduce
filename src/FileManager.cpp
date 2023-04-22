@@ -106,11 +106,11 @@ string FileManager::getFilename(string path) {
   }
 }
 
-array<string, 2> FileManager::readFile(string input_path) {
+array<string, 2> FileManager::readFile(string inputPath) {
   array<string, 2> arr = {"", ""};
 
-  if (FileManager::isValid("file", input_path)) {
-    ifstream file(input_path);
+  if (FileManager::isValid("file", inputPath)) {
+    ifstream file(inputPath);
     if (file.is_open()) {
       string data = "";
       string line = "";
@@ -119,7 +119,7 @@ array<string, 2> FileManager::readFile(string input_path) {
         data += line;
       }
 
-      arr[0] = FileManager::getFilename(input_path);
+      arr[0] = FileManager::getFilename(inputPath);
       arr[1] = data;
       return arr;
     } else {
@@ -130,11 +130,11 @@ array<string, 2> FileManager::readFile(string input_path) {
   }
 };
 
-bool FileManager::writeFile(string mode, string output_path, string filename,
+bool FileManager::writeFile(string mode, string outputPath, string filename,
                             string content) {
-  if (FileManager::isValid("dir", output_path)) {
+  if (FileManager::isValid("dir", outputPath)) {
     if (mode == "w") {
-      ofstream file(output_path + filename, ios::trunc);  // overwrite mode
+      ofstream file(outputPath + filename, ios::trunc);  // overwrite mode
       if (file.is_open()) {
         file << content;
         file.close();
@@ -143,7 +143,7 @@ bool FileManager::writeFile(string mode, string output_path, string filename,
         return false;
       }
     } else if (mode == "a") {
-      ofstream file(output_path + filename, ios::app);  // append mode
+      ofstream file(outputPath + filename, ios::app);  // append mode
       if (file.is_open()) {
         file << content;
         file.close();
@@ -159,11 +159,11 @@ bool FileManager::writeFile(string mode, string output_path, string filename,
   }
 }
 
-vector<string> FileManager::getFilesFromDir(string dir_path) {
+vector<string> FileManager::getFilesFromDir(string dirPath) {
   vector<string> list;
 
-  if (FileManager::isValid("dir", dir_path)) {
-    for (const auto& entry : fs::directory_iterator(dir_path)) {
+  if (FileManager::isValid("dir", dirPath)) {
+    for (const auto& entry : fs::directory_iterator(dirPath)) {
       fs::path outfilename = entry.path();
       string outfilename_str = outfilename.string();
       if (FileManager::isValid("file", outfilename_str)) {
