@@ -27,7 +27,7 @@ void Reduce::reduce(string key, vector<int> intIterator) {
     sum += *i;
   }
 
-  export_result(key, sum);
+  exportResult(key, sum);
 }
 
-void Reduce::export_result(string key, int value) {}
+void Reduce::exportResult(string key, int value) {}
