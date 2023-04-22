@@ -33,10 +33,16 @@ class Reduce {
   string outputDir;
 
   /** 
+   * Write result to a text file
    * @param key string, a distinct word
    * @param intIterator int, number of occurrence
   */
   void exportResult(string key, int value);
+
+  /**
+   * Write SUCCESS file to the output directory
+  */
+  void writeSuccess();
 };
 
 #endif
