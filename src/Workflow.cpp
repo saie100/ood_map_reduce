@@ -31,11 +31,8 @@ void Workflow::start() {
      * Map m = Map()
      * 
      * for (string input: listOfInputs){
-     * 
-     *     FileManger should provide some functionality so its easier to read
-     *     files line by line since map() method only accepts a file name and a
-     *     single line of raw data
-     * 
+     *      
+     *     either the read the file line by line, or get all the lines at once
      *     for line in lines:
      *          m.map(input, line);
      * }
