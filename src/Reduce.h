@@ -27,7 +27,7 @@ class Reduce {
    * @param key string, a distinct word
    * @param intIterator list<int>, an iterator of integers
   */
-  void redue(string key, vector<int> intIterator);
+  void reduce(string key, vector<int> intIterator);
 
  private:
   string outputDir;
@@ -36,7 +36,7 @@ class Reduce {
    * @param key string, a distinct word
    * @param intIterator int, number of occurrence
   */
-  void export_result(string key, int value);
+  void exportResult(string key, int value);
 };
 
 #endif

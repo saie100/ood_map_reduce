@@ -20,7 +20,7 @@ using std::vector;
  */
 Reduce::Reduce(string output_dir) { outputDir = output_dir; }
 
-void Reduce::redue(string key, vector<int> intIterator) {
+void Reduce::reduce(string key, vector<int> intIterator) {
   // Sum all the values in the list
   int sum = 0;
   for (auto i = intIterator.begin(); i != intIterator.end(); i++) {
