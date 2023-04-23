@@ -40,11 +40,11 @@ void Executive::setArguments(int count, char **auguments) {
   }
   
   // Iterate arguments pointer and store arguements in 
-  // member variabFileManager::le list "arguments"
+  // member variable list "arguments"
   for (int i = 1; i < count; i++) {
     // check if the arguement at specified index is a valid directory 
     if (FileManager::isValid(FileManager::DIR, auguments[i])) {
-      this->arguments.push_back(auguments[i]); // add arguement to list
+      this->arguments.push_back(auguments[i]); // add argument to list
     }
   }
 };

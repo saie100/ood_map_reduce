@@ -25,7 +25,7 @@ FileManager::FileManager(){};
 
 // returns true if file/directory exists, else returns false
 // path is the path to the file of directory
-// type is the either FILE or DIR
+// type is either FILE or DIR
 bool FileManager::isValid(TYPE type, string path) {
   struct stat sb; // initialize a stat struct, used for reading system filesystem
   const char* p = path.c_str(); // convert "path" from string into char pointer
