@@ -14,21 +14,27 @@ using std::vector;
 
 class Executive {
  public:
-  // constructor
+
+
+  // Inside the constructor, we initialize the member variable "argumentCount"
+  // and call setArguements to initialize the member variable "arguments"
+  // with the value in char **arguments  
   Executive(int argumentCount, char **arguments);
 
-  // get argument value
+  // return list of arguments
   vector<string> getArguments();
 
  private:
-  /******* Members ******/
-  int argumentCount;
-  vector<string> arguments;
+  /***************************** Members **************************************/
+  int argumentCount; // stores the number of arguments
+  vector<string> arguments; // stores a list of arguments
+  /****************************************************************************/
+  
+  /***************************** Methods **************************************/
+  // Add arguements to the member variable list "arguments"
+  void setArguments(int argumentCount, char **arguments);
+  /****************************************************************************/
 
-  /***** Methods *****/
-
-  // sets argument value
-  void setArgumentValue(int argumentCount, char **arguments);
 };
 
 #endif
