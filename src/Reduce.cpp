@@ -25,6 +25,8 @@ using std::smatch;
 using std::regex_search;
 using std::regex;
 using std::sregex_iterator;
+using std::cout;
+using std::to_string;
 
 
 /**
@@ -47,7 +49,7 @@ void Reduce::reduce(string key, vector<int> intIterator) {
 
 void Reduce::exportResult(string key, int value) {
 
-  string content = key + " : " + to_string(value);
+  string content = key + " : " + to_string(value) + "\n";
   FileManager fm = FileManager();
 
   // if we are going with single output file
@@ -73,6 +75,7 @@ bool Reduce::processSortResult() {
   regex r(R"((\"\w+\"),\s*\[(\d+(,\s*\d+)*)\])");
 
   while (getline(file, line)){
+
     while(regex_search(line, match, r)) {
 
       string word = match[1].str();
