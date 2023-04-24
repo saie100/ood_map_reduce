@@ -67,7 +67,7 @@ void Sort::SortCountsToFile(const map<string, vector<int>>& word_counts, ofstrea
         });
     for (const auto& pair : sorted_pairs) {
         if (pair.first != " " && !pair.first.empty()) {
-            outfile << "(" << pair.first << ", [";
+            outfile << "(\"" << pair.first << "\", [";
             vector<int> counts = pair.second;
             sort(counts.begin(), counts.end());
             for (size_t i = 0; i < counts.size(); i++) {
