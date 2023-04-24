@@ -53,14 +53,3 @@ void Executive::setArguments(int count, char **auguments) {
 vector<string> Executive::getArguments() {
   return this->arguments;
 }
-
-// main function
-int main(int argumentCount, char ** aguments){
-
-  Executive commandline(argumentCount, aguments);
-
-  /*****Call Work Flow and pass it arguments as parameters ****/
-  // Workflow.start(commandline.getArguments)
-
-  return 0;
-}
