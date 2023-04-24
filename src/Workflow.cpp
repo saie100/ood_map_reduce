@@ -22,11 +22,15 @@ void Workflow::start() {
      * The Workflow object should first interact with the FileManager and get
      * a list of files that's in the input directory
      * 
-     * FileManager fm = FileManager(inputDir, tempDir, outputDir)
+     * FileManager fm = FileManager()
      * 
-     * array<string> listOfInputs = fm.getInputFiles()
+     * array<string> listOfInputs = fm.getFilesFromDir(inputDir)
      * 
      * the Workflow object should then instantiate a Map object
+     * 
+     * string tempMapFilePath;
+     * string tempSortFilePath;
+     * string outputFilePath
      * 
      * Map m = Map()
      * 
@@ -34,20 +38,17 @@ void Workflow::start() {
      *      
      *     either the read the file line by line, or get all the lines at once
      *     for line in lines:
-     *          m.map(input, line);
+     *          m.map(input, line, tempFilePath);
      * }
      * 
      * once mapping is done, we can start with sorting
      * 
-     * Sort s = Sort(tempDir);
+     * Sort s = Sort();
+     * s.Reduce(tempFilePath, tempSortFilePath);
      * 
-     * we probably gonna have two different approaches here
-     * 1. we either finish sorting first and then start reducing
-     * 2. the Sort object calls the Reduce object as it finishes sorting for a
-     *     word
+     * Reduce r = Reduce(tempSortFilePath, outputFilePath);
      * 
-     * it might be easier to go with the second approach, since then we dont
-     * have to parse the intermediate files again.
+     * r.processSortResult();
      * 
     */
 }

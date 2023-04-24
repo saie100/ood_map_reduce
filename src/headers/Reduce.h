@@ -21,7 +21,7 @@ class Reduce {
   /**
    * Class Constructor specifying output directory
    */
-  explicit Reduce(string output_dir);
+  explicit Reduce(string input_file_path, string output_file_path);
 
   /** 
    * @param key string, a distinct word
@@ -29,7 +29,10 @@ class Reduce {
   */
   void reduce(string key, vector<int> intIterator);
 
+  bool processSortResult();
+
  private:
+  string inputFilePath;
   string outputDir;
 
   /** 
@@ -43,6 +46,7 @@ class Reduce {
    * Write SUCCESS file to the output directory
   */
   void writeSuccess();
+
 };
 
 #endif
