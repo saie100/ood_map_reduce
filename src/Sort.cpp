@@ -1,5 +1,6 @@
 
 #include "headers/Sort.h"
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -101,6 +102,7 @@ bool Sort::UpdateWordCounts(map<string, vector<int>>& word_counts) {
     else {
         return false;
     }
+  }
 }
 
 void Sort::SortCountsToFile(const map<string, vector<int>>& word_counts) {

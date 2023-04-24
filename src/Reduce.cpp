@@ -7,32 +7,32 @@
  **/
 
 #include "headers/Reduce.h"
-#include "headers/FileManager.h"
+
 #include <fstream>
 #include <iostream>
 #include <regex>
 #include <string>
 #include <vector>
 
-using std::string;
-using std::vector;
-using std::to_string;
-using std::ifstream;
+#include "headers/FileManager.h"
+
 using std::cerr;
+using std::cout;
 using std::endl;
 using std::getline;
-using std::smatch;
-using std::regex_search;
+using std::ifstream;
 using std::regex;
+using std::regex_search;
+using std::smatch;
 using std::sregex_iterator;
-using std::cout;
+using std::string;
 using std::to_string;
-
+using std::vector;
 
 /**
  * Class Constructor specifying output directory
  */
-Reduce::Reduce(string input_file_path, string output_dir){
+Reduce::Reduce(string input_file_path, string output_dir) {
   inputFilePath = input_file_path;
   outputDir = output_dir;
 }
@@ -48,23 +48,20 @@ void Reduce::reduce(string key, vector<int> intIterator) {
 }
 
 void Reduce::exportResult(string key, int value) {
-
   string content = "(" + key + "," + to_string(value) + ")" + "\n";
   FileManager fm = FileManager();
 
   string fileName = "output.txt";
 
-  bool isSuccessfulWrite = fm.writeFile(
-    FileManager::APPEND, outputDir, fileName, content
-  );
-
+  bool isSuccessfulWrite =
+      fm.writeFile(FileManager::APPEND, outputDir, fileName, content);
 }
 
 bool Reduce::processSortResult() {
   // read the intermediate file
   ifstream file(inputFilePath);
 
-  if (!file){
+  if (!file) {
     cerr << "Error: could not open file" << endl;
     return false;
   }
@@ -73,19 +70,18 @@ bool Reduce::processSortResult() {
   smatch match;
   regex r(R"((\"\w+\"),\s*\[(\d+(,\s*\d+)*)\])");
 
-  while (getline(file, line)){
-
-    while(regex_search(line, match, r)) {
-
+  while (getline(file, line)) {
+    while (regex_search(line, match, r)) {
       string word = match[1].str();
       string ones = match[2].str();
 
-      vector< int > onesList;
+      vector<int> onesList;
       regex one_r("\\d+");
 
-      for (sregex_iterator it(ones.begin(), ones.end(), one_r), end_it; it != end_it; ++it) {
-          int num = stoi(it->str());
-          onesList.push_back(num);
+      for (sregex_iterator it(ones.begin(), ones.end(), one_r), end_it;
+           it != end_it; ++it) {
+        int num = stoi(it->str());
+        onesList.push_back(num);
       }
 
       reduce(word, onesList);
@@ -97,9 +93,8 @@ bool Reduce::processSortResult() {
   return true;
 }
 
-void Reduce::writeSuccess(){
+void Reduce::writeSuccess() {
   FileManager fm = FileManager();
-  bool isSuccessfulWrite = fm.writeFile(
-    FileManager::CREATE, outputDir, "SUCCESS.txt", "SUCCESS"
-  );
+  bool isSuccessfulWrite =
+      fm.writeFile(FileManager::CREATE, outputDir, "SUCCESS.txt", "SUCCESS");
 }
