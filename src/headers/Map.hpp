@@ -15,13 +15,17 @@ class Map
 {
 public:
     // default constructor
-    Map();
+    Map(const string& aOutputPath);
 
     // tokenizes the value into distinct words, removing whitespace, punctuation, and capitalization
     void map(const string& aKey, const string& aValue);
 
+private:
     // exports tokenized values to the disk
     void exportData(const string& aKey, const string& aValue);
+
+    string outputPath; // holds the output path for the exportData function
+
 };
 
 #endif
