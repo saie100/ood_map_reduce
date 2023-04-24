@@ -1,7 +1,12 @@
-#include "Workflow.h"
+#include "headers/Workflow.h"
+#include "headers/FileManager.h"
+#include "headers/Map.hpp"
 #include <string>
+#include <vector>
 
 using std::string;
+using std::cout;
+using std::endl;
 
 /**
  * Class Constructor specifying directories
@@ -11,13 +16,25 @@ inputDir(input_dir),tempDir(temp_dir),outputDir(output_dir){
     
 }
 
-/**
- * Q for the team: should we make FileManager a member variable for Map, Sort,
- * and Reduce so its easier for them to write and read files.
-*/
-
 
 void Workflow::start() {
+    FileManager fm = FileManager();
+    vector<string> inputFilePaths = fm.getFilesFromDir(inputDir);
+
+    string tempMapOutputFilePath = tempDir + "/tempMapOutput.txt";
+    string tempSortFilePath;
+    string outputFilePath;
+
+    Map m = Map();
+
+    for (string inputFilePath: inputFilePaths){
+
+        array<string, 2> inputFile = fm.readFile(inputFilePath);
+        string inputFileName = inputFile[0];
+        string inputContent = inputFile[1];
+
+        m.map(inputFileName, inputContent);
+    }
     /**
      * The Workflow object should first interact with the FileManager and get
      * a list of files that's in the input directory
