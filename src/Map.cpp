@@ -22,7 +22,7 @@ using std::find_if;
 using std::distance;
 
 // default constructor
-Map::Map() {}
+Map::Map(const string& aOutputPath) : outputPath(aOutputPath) {}
 
 // checks if the passed in character is a punctuation or whitespace character
 bool isPunctOrSpace(int aChar) {
@@ -168,22 +168,22 @@ void Map::map(const string& aKey, const string& aValue) {
             tempValue.erase(0, 1);
         } else if (contractionStr1.size() > 0 && contractionStr2.size() > 0) {
             // we have contraction strings, add the tuples to the output buffer
-            outputBuffer += "(";
+            outputBuffer += "(\"";
             outputBuffer += contractionStr1;
-            outputBuffer += ", 1)";
-            outputBuffer += "(";
+            outputBuffer += "\",1)";
+            outputBuffer += "(\"";
             outputBuffer += contractionStr2;
-            outputBuffer += ", 1)";
+            outputBuffer += "\",1)";
         } else {
             // punctuation or space found, grab the string
             subStr = tempValue.substr(0, foundIdx);
             // add the (word, 1) pair to the output buffer
-            outputBuffer += "(";
+            outputBuffer += "(\"";
             // loop through the sub string, adding the word as a lowercase string to the output buffer
             for (char c : subStr) {
                 outputBuffer += static_cast<char>(tolower(c));
             }
-            outputBuffer += ", 1)";
+            outputBuffer += "\",1)";
             // erase the word from tempValue
             tempValue.erase(tempValue.begin(), it);
             if (tempValue.size() > 0) {
@@ -213,7 +213,7 @@ void Map::map(const string& aKey, const string& aValue) {
 void Map::exportData(const string& aKey, const string& aValue) {
     // TODO export the data with FileManagement
     // Initialize the output file stream
-    std::ofstream outfile("out.txt", std::iostream::app);
+    std::ofstream outfile(outputPath, std::iostream::app);
     if (!outfile.is_open()) {
         std::cerr << "Error: could not open output file" << std::endl;
         return;

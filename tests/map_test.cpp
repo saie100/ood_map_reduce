@@ -16,7 +16,7 @@ using std::vector;
 
 TEST(MapTest, BasicString){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -29,13 +29,13 @@ TEST(MapTest, BasicString){
         infile.close();
     }
 
-    ASSERT_EQ(fileData, "(hey, 1)(this, 1)(is, 1)(a, 1)(string, 1)");
+    ASSERT_EQ(fileData, "(\"hey\",1)(\"this\",1)(\"is\",1)(\"a\",1)(\"string\",1)");
 
 }
 
 TEST(MapTest, Punctuation){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -48,13 +48,13 @@ TEST(MapTest, Punctuation){
         infile.close();
     }
 
-    ASSERT_EQ(fileData, "(this, 1)(is, 1)(testing, 1)(punctuation, 1)");
+    ASSERT_EQ(fileData, "(\"this\",1)(\"is\",1)(\"testing\",1)(\"punctuation\",1)");
 
 }
 
 TEST(MapTest, Whitespace){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -67,13 +67,13 @@ TEST(MapTest, Whitespace){
         infile.close();
     }
 
-    ASSERT_EQ(fileData, "(we, 1)(have, 1)(whitespace, 1)");
+    ASSERT_EQ(fileData, "(\"we\",1)(\"have\",1)(\"whitespace\",1)");
 
 }
 
 TEST(MapTest, Newline){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -86,13 +86,13 @@ TEST(MapTest, Newline){
         infile.close();
     }
 
-    ASSERT_EQ(fileData, "(we, 1)(have, 1)(newlines, 1)");
+    ASSERT_EQ(fileData, "(\"we\",1)(\"have\",1)(\"newlines\",1)");
 
 }
 
 TEST(MapTest, IsContractions){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -105,8 +105,8 @@ TEST(MapTest, IsContractions){
         infile.close();
     }
 
-    string compareStr = "(it, 1)(is, 1)(he, 1)(is, 1)(she, 1)(is, 1)(who, 1)(is, 1)(what, 1)(is, 1)(when, 1)(is, 1)(where, 1)(is, 1)(why, 1)(is, 1)(how, 1)(is, 1)";
-    compareStr += "(which, 1)(is, 1)(this, 1)(is, 1)(that, 1)(is, 1)(here, 1)(is, 1)(there, 1)(is, 1)(somebody, 1)(is, 1)(someone, 1)(is, 1)(something, 1)(is, 1)";
+    string compareStr = "(\"it\",1)(\"is\",1)(\"he\",1)(\"is\",1)(\"she\",1)(\"is\",1)(\"who\",1)(\"is\",1)(\"what\",1)(\"is\",1)(\"when\",1)(\"is\",1)(\"where\",1)(\"is\",1)(\"why\",1)(\"is\",1)(\"how\",1)(\"is\",1)";
+    compareStr += "(\"which\",1)(\"is\",1)(\"this\",1)(\"is\",1)(\"that\",1)(\"is\",1)(\"here\",1)(\"is\",1)(\"there\",1)(\"is\",1)(\"somebody\",1)(\"is\",1)(\"someone\",1)(\"is\",1)(\"something\",1)(\"is\",1)";
 
     ASSERT_EQ(fileData, compareStr);
 
@@ -114,7 +114,7 @@ TEST(MapTest, IsContractions){
 
 TEST(MapTest, AreContractions){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -127,8 +127,8 @@ TEST(MapTest, AreContractions){
         infile.close();
     }
 
-    string compareStr = "(you, 1)(are, 1)(we, 1)(are, 1)(they, 1)(are, 1)(who, 1)(are, 1)(what, 1)(are, 1)(when, 1)(are, 1)(where, 1)(are, 1)(why, 1)(are, 1)";
-    compareStr += "(how, 1)(are, 1)(which, 1)(are, 1)";
+    string compareStr = "(\"you\",1)(\"are\",1)(\"we\",1)(\"are\",1)(\"they\",1)(\"are\",1)(\"who\",1)(\"are\",1)(\"what\",1)(\"are\",1)(\"when\",1)(\"are\",1)(\"where\",1)(\"are\",1)(\"why\",1)(\"are\",1)";
+    compareStr += "(\"how\",1)(\"are\",1)(\"which\",1)(\"are\",1)";
 
     ASSERT_EQ(fileData, compareStr);
 
@@ -136,7 +136,7 @@ TEST(MapTest, AreContractions){
 
 TEST(MapTest, DidContractions){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -149,7 +149,7 @@ TEST(MapTest, DidContractions){
         infile.close();
     }
 
-    string compareStr = "(i, 1)(did, 1)(you, 1)(did, 1)(he, 1)(did, 1)(she, 1)(did, 1)(it, 1)(did, 1)(we, 1)(did, 1)(they, 1)(did, 1)";
+    string compareStr = "(\"i\",1)(\"did\",1)(\"you\",1)(\"did\",1)(\"he\",1)(\"did\",1)(\"she\",1)(\"did\",1)(\"it\",1)(\"did\",1)(\"we\",1)(\"did\",1)(\"they\",1)(\"did\",1)";
 
     ASSERT_EQ(fileData, compareStr);
 
@@ -157,7 +157,7 @@ TEST(MapTest, DidContractions){
 
 TEST(MapTest, ImContraction){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -170,7 +170,7 @@ TEST(MapTest, ImContraction){
         infile.close();
     }
 
-    string compareStr = "(i, 1)(am, 1)(just, 1)(checking, 1)(the, 1)(i, 1)(am, 1)(contraction, 1)";
+    string compareStr = "(\"i\",1)(\"am\",1)(\"just\",1)(\"checking\",1)(\"the\",1)(\"i\",1)(\"am\",1)(\"contraction\",1)";
 
     ASSERT_EQ(fileData, compareStr);
 
@@ -178,7 +178,7 @@ TEST(MapTest, ImContraction){
 
 TEST(MapTest, WillContraction){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -191,7 +191,7 @@ TEST(MapTest, WillContraction){
         infile.close();
     }
 
-    string compareStr = "(i, 1)(will, 1)(you, 1)(will, 1)(they, 1)(will, 1)(it, 1)(will, 1)(this, 1)(will, 1)(we, 1)(will, 1)(somebody, 1)(will, 1)";
+    string compareStr = "(\"i\",1)(\"will\",1)(\"you\",1)(\"will\",1)(\"they\",1)(\"will\",1)(\"it\",1)(\"will\",1)(\"this\",1)(\"will\",1)(\"we\",1)(\"will\",1)(\"somebody\",1)(\"will\",1)";
 
     ASSERT_EQ(fileData, compareStr);
 
@@ -199,7 +199,7 @@ TEST(MapTest, WillContraction){
 
 TEST(MapTest, HaveContraction){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -212,7 +212,7 @@ TEST(MapTest, HaveContraction){
         infile.close();
     }
 
-    string compareStr = "(i, 1)(have, 1)(you, 1)(have, 1)(we, 1)(have, 1)(they, 1)(have, 1)(who, 1)(have, 1)(what, 1)(have, 1)(how, 1)(have, 1)";
+    string compareStr = "(\"i\",1)(\"have\",1)(\"you\",1)(\"have\",1)(\"we\",1)(\"have\",1)(\"they\",1)(\"have\",1)(\"who\",1)(\"have\",1)(\"what\",1)(\"have\",1)(\"how\",1)(\"have\",1)";
 
     ASSERT_EQ(fileData, compareStr);
 
@@ -220,7 +220,7 @@ TEST(MapTest, HaveContraction){
 
 TEST(MapTest, NotContraction){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -233,7 +233,7 @@ TEST(MapTest, NotContraction){
         infile.close();
     }
 
-    string compareStr = "(am, 1)(not, 1)(will, 1)(not, 1)(can, 1)(not, 1)(has, 1)(not, 1)(must, 1)(not, 1)(would, 1)(not, 1)(should, 1)(not, 1)";
+    string compareStr = "(\"am\",1)(\"not\",1)(\"will\",1)(\"not\",1)(\"can\",1)(\"not\",1)(\"has\",1)(\"not\",1)(\"must\",1)(\"not\",1)(\"would\",1)(\"not\",1)(\"should\",1)(\"not\",1)";
 
     ASSERT_EQ(fileData, compareStr);
 
@@ -241,7 +241,7 @@ TEST(MapTest, NotContraction){
 
 TEST(MapTest, KeepApostrophe){
 
-    Map map;
+    Map map("out.txt");
     // clear out the out file
     std::ofstream outfile("out.txt");
     outfile.close();
@@ -254,7 +254,7 @@ TEST(MapTest, KeepApostrophe){
         infile.close();
     }
 
-    string compareStr = "(checking, 1)(weird, 1)(words, 1)(like, 1)(o'er, 1)(and, 1)('t, 1)";
+    string compareStr = "(\"checking\",1)(\"weird\",1)(\"words\",1)(\"like\",1)(\"o'er\",1)(\"and\",1)(\"'t\",1)";
 
     ASSERT_EQ(fileData, compareStr);
 
