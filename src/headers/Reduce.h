@@ -21,7 +21,7 @@ class Reduce {
   /**
    * Class Constructor specifying output directory
    */
-  explicit Reduce(string input_file_path, string output_file_path);
+  explicit Reduce(string input_file_path, string output_dir);
 
   /** 
    * @param key string, a distinct word
