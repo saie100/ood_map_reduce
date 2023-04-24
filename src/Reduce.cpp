@@ -52,7 +52,6 @@ void Reduce::exportResult(string key, int value) {
   string content = "(" + key + "," + to_string(value) + ")" + "\n";
   FileManager fm = FileManager();
 
-  // if we are going with single output file
   string fileName = "output.txt";
 
   bool isSuccessfulWrite = fm.writeFile(
