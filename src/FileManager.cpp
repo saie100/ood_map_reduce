@@ -153,14 +153,11 @@ array<string, 2> FileManager::readFile(string inputPath) {
 // and content of the file. This method returns true if file was 
 // successfully written to outputDir, else returns false 
 bool FileManager::writeFile(MODE mode, string outputPath, string filename, string content) {
-  return FileManager::writeFile(mode, outputPath+filename, content);
-}
 
-// given the mode (CREATE, APPEND), the file path, and content of the file. 
-// This method returns true if file was successfully written, else returns false 
-bool FileManager::writeFile(MODE mode, string filePath, string content) {
-  // check if filePath is a valid file path
-  if (FileManager::isValid(FILE, filePath)) {
+  string filePath = outputPath + "/" + filename;
+
+  // check if the outputPath is a valid directory path
+  if (FileManager::isValid(DIR, outputPath)) {
     if (mode == CREATE) {
       // open file in overwrite mode  
       ofstream file(filePath, ios::trunc);  // overwrite mode
