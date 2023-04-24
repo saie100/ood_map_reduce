@@ -1,6 +1,5 @@
 # ood_map_reduce
 
-
 ## Unit Testing
 This command creates a build folder with generated Makefile. (You should have a CMakeList.txt file in the same directory you run this command)
 ```console
@@ -11,6 +10,9 @@ This command generates the unit test executable by executing the Makefile
 cd build
 make
 ```
+## Sequence Diagram
+
+![seq_diagram](docs/sequence.drawio.svg)
 
 ## Development
 
