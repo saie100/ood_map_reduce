@@ -6,8 +6,8 @@
  * Project MapReduce
  **/
 
-#include "Reduce.h"
-#include "FileManager.h"
+#include "headers/Reduce.h"
+#include "headers/FileManager.h"
 #include <fstream>
 #include <iostream>
 #include <regex>
@@ -49,7 +49,7 @@ void Reduce::reduce(string key, vector<int> intIterator) {
 
 void Reduce::exportResult(string key, int value) {
 
-  string content = key + " : " + to_string(value) + "\n";
+  string content = "(" + key + "," + to_string(value) + ")" + "\n";
   FileManager fm = FileManager();
 
   // if we are going with single output file
