@@ -27,22 +27,22 @@ class FileManager {
   static bool isValid(TYPE type, string path);
 
   // returns filename given a path to a file
-  string getFilename(string path);
+  static string getFilename(string path);
 
   // returns an array of strings given a path to a file 
   // first index is the name of the file
   // the second index is the content of the file
-  array<string, 2> readFile(string inputPath);
+  static array<string, 2> readFile(string inputPath);
 
   // given the mode (CREATE, APPEND), path to output directory, the filename,
   // and content of the file. This method returns true if file was 
   // successfully written to outputDir, else returns false 
-  bool writeFile(MODE mode, string outputDir, string filename,
+  static bool writeFile(MODE mode, string outputDir, string filename,
                  string content);
 
   // returns a list of files inside a directory
   // parameter dirPath is the path to the directory
-  vector<string> getFilesFromDir(string dirPath);
+  static vector<string> getFilesFromDir(string dirPath);
 
  private:
 };

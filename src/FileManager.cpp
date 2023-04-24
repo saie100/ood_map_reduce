@@ -58,7 +58,7 @@ bool FileManager::isValid(TYPE type, string path) {
   }
   // else "path" given is an invalid path on computer filesystem
   else {
-    cerr << "Error: Invalid Path: " << path << endl;
+    cerr << "Error invalid path: " << path << endl;
     exit(1);
   }
 };

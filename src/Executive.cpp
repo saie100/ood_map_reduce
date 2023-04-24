@@ -31,7 +31,7 @@ void Executive::setArguments(int count, char **auguments) {
     exit(1);
   }
   else if (count == 2) {
-    cerr << "Error: 1 arguments entered, need 3\nHelp: main [input dir] [temp dir] [output dir]" << endl;
+    cerr << "Error: 1 argument entered, need 3\nHelp: main [input dir] [temp dir] [output dir]" << endl;
     exit(1);
   }
   else if (count == 3) {

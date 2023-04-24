@@ -17,7 +17,11 @@ enable_testing()
 
 include(GoogleTest)
 include_directories(src/headers/)
+# Create unit test executable
 add_executable(unit_test tests/unit_test.cpp src/Executive.cpp src/FileManager.cpp)
+# Create main executable
+add_executable(main main.cpp src/Executive.cpp src/FileManager.cpp)
+
 
 #target_link_libraries(unit_test GTest::gtest) # Custom main function
 target_link_libraries(unit_test GTest::gtest_main) #Google's main function implementation
