@@ -1,6 +1,9 @@
 #include "headers/Workflow.h"
 #include "headers/FileManager.h"
 #include "headers/Map.hpp"
+#include "headers/Sort.h"
+#include "headers/Reduce.h"
+
 #include <string>
 #include <vector>
 
@@ -22,10 +25,11 @@ void Workflow::start() {
     vector<string> inputFilePaths = fm.getFilesFromDir(inputDir);
 
     string tempMapOutputFilePath = tempDir + "/tempMapOutput.txt";
-    string tempSortFilePath;
-    string outputFilePath;
+    string tempSortOutputFilePath = tempDir + "/tempSortOutput.txt";
 
-    Map m = Map();
+    Map m = Map(tempMapOutputFilePath);
+    Sort s;
+    Reduce r = Reduce(tempSortOutputFilePath, outputDir);
 
     for (string inputFilePath: inputFilePaths){
 
@@ -35,37 +39,8 @@ void Workflow::start() {
 
         m.map(inputFileName, inputContent);
     }
-    /**
-     * The Workflow object should first interact with the FileManager and get
-     * a list of files that's in the input directory
-     * 
-     * FileManager fm = FileManager()
-     * 
-     * array<string> listOfInputs = fm.getFilesFromDir(inputDir)
-     * 
-     * the Workflow object should then instantiate a Map object
-     * 
-     * string tempMapFilePath;
-     * string tempSortFilePath;
-     * string outputFilePath
-     * 
-     * Map m = Map()
-     * 
-     * for (string input: listOfInputs){
-     *      
-     *     either the read the file line by line, or get all the lines at once
-     *     for line in lines:
-     *          m.map(input, line, tempFilePath);
-     * }
-     * 
-     * once mapping is done, we can start with sorting
-     * 
-     * Sort s = Sort();
-     * s.Reduce(tempFilePath, tempSortFilePath);
-     * 
-     * Reduce r = Reduce(tempSortFilePath, outputFilePath);
-     * 
-     * r.processSortResult();
-     * 
-    */
+
+    s.Reduce(tempMapOutputFilePath, tempSortOutputFilePath);
+
+    r.processSortResult();
 }
