@@ -34,6 +34,5 @@
 # VS code
 .vscode
 
-data/temp/*
-data/output/*
+data/*
 main
