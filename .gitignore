@@ -33,3 +33,7 @@
 
 # VS code
 .vscode
+
+data/temp/*
+data/output/*
+main
