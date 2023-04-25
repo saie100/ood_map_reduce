@@ -54,7 +54,7 @@ void Reduce::exportResult(string key, int value) {
   string fileName = "output.txt";
 
   bool isSuccessfulWrite =
-    fileManager.writeFile(FileManager::APPEND, outputDir, fileName, content);
+    FileManager::writeFile(FileManager::APPEND, outputDir, fileName, content);
 }
 
 bool Reduce::processSortResult() {
