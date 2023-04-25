@@ -9,7 +9,7 @@
 class Sort {
 public:
     // Constructor that takes the input and output file names as arguments
-    Sort(const std::string& input_filename, const std::string& output_filename);
+    Sort(const std::string& input_filename, const std::string& output_filename, const std::string& outputPath);
 
     // Public function that reduces the input file and writes the output to the output file
     void Sorter();

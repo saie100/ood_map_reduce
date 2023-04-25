@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <regex>
+#include <iostream>
+#include <sstream>
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -15,7 +17,7 @@ using std::sort;
 using std::string;
 using std::vector;
 // Constructor that sets the input and output file names
-Sort::Sort(const std::string& input_filename, const std::string& output_filename)
+Sort::Sort(const std::string& input_filename, const std::string& output_filename,const std::string& outputPath)
     : input_filename_(input_filename), output_filename_(output_filename) {}
 
 // The main function that sorts the word counts and writes the output to a file
@@ -47,7 +49,7 @@ void Sort::Sorter() {
 
     ///////////////////////////////////////////////////////////////////////////////
     // print to output_filename 
-    //FileManager::writeFile(MODE mode, string outputPath, output_filename_, result)
+    //FileManager::writeFile(CREATE, string outputPath, output_filename_, result)
     // 
     /////////////////////////////////////////////////////////////////////////////////
 
