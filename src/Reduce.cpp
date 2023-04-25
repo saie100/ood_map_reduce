@@ -35,6 +35,7 @@ using std::vector;
 Reduce::Reduce(string input_file_path, string output_dir) {
   inputFilePath = input_file_path;
   outputDir = output_dir;
+  FileManager fileManager;
 }
 
 void Reduce::reduce(string key, vector<int> intIterator) {
@@ -49,44 +50,36 @@ void Reduce::reduce(string key, vector<int> intIterator) {
 
 void Reduce::exportResult(string key, int value) {
   string content = "(" + key + "," + to_string(value) + ")" + "\n";
-  FileManager fm = FileManager();
 
   string fileName = "output.txt";
 
   bool isSuccessfulWrite =
-      fm.writeFile(FileManager::APPEND, outputDir, fileName, content);
+    fileManager.writeFile(FileManager::APPEND, outputDir, fileName, content);
 }
 
 bool Reduce::processSortResult() {
-  // read the intermediate file
-  ifstream file(inputFilePath);
 
-  if (!file) {
-    cerr << "Error: could not open file" << endl;
-    return false;
-  }
-
-  string line;
   smatch match;
   regex r(R"((\"\w+\"),\s*\[(\d+(,\s*\d+)*)\])");
 
-  while (getline(file, line)) {
-    while (regex_search(line, match, r)) {
-      string word = match[1].str();
-      string ones = match[2].str();
+  array<string, 2> inputFile = fileManager.readFile(inputFilePath);
+  string line = inputFile[1];
 
-      vector<int> onesList;
-      regex one_r("\\d+");
+  while (regex_search(line, match, r)) {
+    string word = match[1].str();
+    string ones = match[2].str();
 
-      for (sregex_iterator it(ones.begin(), ones.end(), one_r), end_it;
-           it != end_it; ++it) {
-        int num = stoi(it->str());
-        onesList.push_back(num);
-      }
+    vector<int> onesList;
+    regex one_r("\\d+");
 
-      reduce(word, onesList);
-      line = match.suffix();
+    for (sregex_iterator it(ones.begin(), ones.end(), one_r), end_it;
+          it != end_it; ++it) {
+      int num = stoi(it->str());
+      onesList.push_back(num);
     }
+
+    reduce(word, onesList);
+    line = match.suffix();
   }
 
   writeSuccess();
@@ -94,7 +87,7 @@ bool Reduce::processSortResult() {
 }
 
 void Reduce::writeSuccess() {
-  FileManager fm = FileManager();
+
   bool isSuccessfulWrite =
-      fm.writeFile(FileManager::CREATE, outputDir, "SUCCESS.txt", "SUCCESS");
+      fileManager.writeFile(FileManager::CREATE, outputDir, "SUCCESS.txt", "SUCCESS");
 }

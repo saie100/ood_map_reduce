@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <string>
+#include "FileManager.h"
 
 using std::vector;
 using std::string;
@@ -34,6 +35,7 @@ class Reduce {
  private:
   string inputFilePath;
   string outputDir;
+  FileManager fileManager;
 
   /** 
    * Write result to a text file
