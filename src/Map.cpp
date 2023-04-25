@@ -201,5 +201,5 @@ void Map::map(const string& aKey, const string& aValue) {
 // exports tokenized values to the disk
 void Map::exportData(const string& aKey, const string& aValue) {
     // write the data to the file
-    FileManager::writeFile(FileManager::MODE::APPEND, outputPath, aKey, aValue);
+    FileManager::writeFile(FileManager::MODE::APPEND, outputPath, aValue);
 }
