@@ -26,7 +26,6 @@ void Workflow::start() {
   string tempSortOutputFilePath = tempDir + "/tempSortOutput.txt";
 
   Map m = Map(tempMapOutputFilePath);
-  // TODO
   Sort s = Sort(tempMapOutputFilePath, tempSortOutputFilePath);
   Reduce r = Reduce(tempSortOutputFilePath, outputDir);
 
