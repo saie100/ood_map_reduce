@@ -5,10 +5,9 @@ Periodically outputs data to a temporary file.
 */
 
 #include "headers/Map.hpp"
+#include "headers/FileManager.h"
 #include <cctype>
 #include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <array>
 
 // #define TEST_STUB
@@ -211,29 +210,18 @@ void Map::map(const string& aKey, const string& aValue) {
 
 // exports tokenized values to the disk
 void Map::exportData(const string& aKey, const string& aValue) {
-    // TODO export the data with FileManagement
-    // Initialize the output file stream
-    std::ofstream outfile(outputPath, std::iostream::app);
-    if (!outfile.is_open()) {
-        std::cerr << "Error: could not open output file" << std::endl;
-        return;
-    }
-
-    outfile << aValue;
-
-    // Close the output file stream
-    outfile.close();
+    FileManager fm;
+    fm.writeFile(FileManager::MODE::APPEND, outputPath, aKey, aValue);
 }
 
 #ifdef TEST_STUB
 int main() {
-    Map map;
-    map.map("file", "Checking weird words like o'er and 't");
-    // map.map("file", "you're we're they're who're what're when're where're why're how're which're");
+    Map map("/temp/");
+    map.map("out.txt", "Checking weird words like o'er and 't");
+    // map.map("out.txt", "you're we're they're who're what're when're where're why're how're which're");
     // Map mapguy;
     // string testStr = "This here is a string's string, go ahead and buffer this. You're probably going to see who's got apostrophes";
-    // string fileName = "file";
-    // mapguy.map(fileName, testStr);
+    // mapguy.map("out.txt", testStr);
     // string allswell = "ACT I\n";
     // allswell += "SCENE I. Rousillon. The COUNT's palace.\n\n";
     // allswell += "Enter BERTRAM, the COUNTESS of Rousillon, HELENA, and LAFEU, all in black\n";
@@ -270,7 +258,6 @@ int main() {
     // allswell += "He was famous, sir, in his profession, and it was\n";
     // allswell += "his great right to be so: Gerard de Narbon.\n";
 
-    // fileName = "all's well that end's well";
-    // mapguy.map(fileName, allswell);
+    // mapguy.map("out.txt", allswell);
 }
 #endif
