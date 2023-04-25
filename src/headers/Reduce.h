@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <string>
+#include "FileManager.h"
 
 using std::vector;
 using std::string;
@@ -21,7 +22,7 @@ class Reduce {
   /**
    * Class Constructor specifying output directory
    */
-  explicit Reduce(string input_file_path, string output_file_path);
+  explicit Reduce(string input_file_path, string output_dir);
 
   /** 
    * @param key string, a distinct word
@@ -34,6 +35,7 @@ class Reduce {
  private:
   string inputFilePath;
   string outputDir;
+  FileManager fileManager;
 
   /** 
    * Write result to a text file

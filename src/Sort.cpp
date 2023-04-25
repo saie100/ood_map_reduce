@@ -1,5 +1,6 @@
 
 #include "headers/Sort.h"
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -19,6 +20,7 @@ using std::vector;
 // Constructor that sets the input and output file names
 Sort::Sort(const std::string& input_filename, const std::string& output_filename,const std::string& outputPath)
     : input_filename_(input_filename), output_filename_(output_filename) {}
+
 
 // The main function that sorts the word counts and writes the output to a file
 void Sort::Sorter() {
@@ -54,11 +56,13 @@ void Sort::Sorter() {
     /////////////////////////////////////////////////////////////////////////////////
 
 
+
     // Print a message to indicate that the sorting is complete
     cout << "Finished writing to " << output_filename_ << endl;
 }
 // Helper function to extract a string from a pair string
 string Sort::ExtractString(const string& pair_string) {
+
 
     // Find the start and end index of the string within the pair string
     size_t start_index = pair_string.find_first_of("\"") + 1;
@@ -66,6 +70,7 @@ string Sort::ExtractString(const string& pair_string) {
 
     // Find the start and end index of the string within the pair string
     return pair_string.substr(start_index, end_index - start_index);
+
 }
 // Helper function to update the word counts based on the input data
 bool Sort::UpdateWordCounts(map<string, vector<int>>& word_counts) {
@@ -89,6 +94,7 @@ bool Sort::UpdateWordCounts(map<string, vector<int>>& word_counts) {
             start = data.find("(\"", end);
         }
 
+
         // Add words to word_counts map
         for (const std::string& word : words) {
             if (!word.empty()) {
@@ -100,8 +106,15 @@ bool Sort::UpdateWordCounts(map<string, vector<int>>& word_counts) {
     }
     else {
         return false;
+
     }
+    infile.close();
+    return true;
+  } else {
+    return false;
+  }
 }
+
 
 void Sort::SortCountsToFile(const map<string, vector<int>>& word_counts) {
     string result; // A string to store the final result
@@ -129,11 +142,16 @@ void Sort::SortCountsToFile(const map<string, vector<int>>& word_counts) {
             }
 
             result += "]),"; // Add closing brackets and comma to the result string
+
         }
+      }
+      outfile << "]),";
     }
+
 
     // Print the result string to the console
     std::cout << result << std::endl;
 
     
+
 }
