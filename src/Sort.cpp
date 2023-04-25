@@ -1,6 +1,7 @@
 
 #include "headers/Sort.h"
-
+#include "headers/FileManager.h"
+#include <array>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -17,8 +18,10 @@ using std::pair;
 using std::sort;
 using std::string;
 using std::vector;
+using std::array;
+
 // Constructor that sets the input and output file names
-Sort::Sort(const std::string& input_filename, const std::string& output_filename,const std::string& outputPath)
+Sort::Sort(const std::string& input_filename, const std::string& output_filename)
     : input_filename_(input_filename), output_filename_(output_filename) {}
 
 // The main function that sorts the word counts and writes the output to a file
@@ -28,9 +31,9 @@ void Sort::Sorter() {
    
     
     /// ////////////////////////////////////////////////////////////////////
-   // array<string, 2> arr;
-   // arr= FileManager::readFile(string input_filename);
-   // data = arr[1];
+    array<string, 2> arr;
+    arr= FileManager::readFile(input_filename_);
+    data = arr[1];
     //////////////////////////////////////////////////////////////////////////////
    
    
@@ -50,7 +53,7 @@ void Sort::Sorter() {
 
     ///////////////////////////////////////////////////////////////////////////////
     // print to output_filename 
-    //FileManager::writeFile(CREATE, string outputPath, output_filename_, result)
+    FileManager::writeFile(FileManager::CREATE, output_filename_, result);
     // 
     /////////////////////////////////////////////////////////////////////////////////
 
@@ -102,7 +105,6 @@ bool Sort::UpdateWordCounts(map<string, vector<int>>& word_counts) {
     else {
         return false;
     }
-  }
 }
 
 void Sort::SortCountsToFile(const map<string, vector<int>>& word_counts) {
