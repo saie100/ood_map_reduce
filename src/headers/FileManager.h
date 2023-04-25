@@ -40,6 +40,10 @@ class FileManager {
   static bool writeFile(MODE mode, string outputDir, string filename,
                  string content);
 
+   // given the mode (CREATE, APPEND), the file path, and content of the file. 
+   // This method returns true if file was successfully written, else returns false 
+  static bool writeFile(MODE mode,string filePath, string content);
+
   // returns a list of files inside a directory
   // parameter dirPath is the path to the directory
   static vector<string> getFilesFromDir(string dirPath);

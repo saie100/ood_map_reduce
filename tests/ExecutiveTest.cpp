@@ -21,9 +21,11 @@ TEST(ExecutiveTest, NoArgument){
     int arguementCount = 0;
     char * command[arguementCount + 1] = {"./main"};
     char ** pointer = command;
-    
-    Executive commandline(arguementCount +1, pointer);
-    EXPECT_DEATH(commandline.getArguments(), "Error: No arguments entered, need 3\nHelp: main [input dir] [temp dir] [output dir]");
+
+    EXPECT_DEATH({
+        Executive commandline(arguementCount +1, pointer);
+        commandline.getArguments();
+        }, "Error: No arguments entered, need 3");           
 }
 
 TEST(ExecutiveTest, OneArgument){
@@ -33,8 +35,10 @@ TEST(ExecutiveTest, OneArgument){
     char * command[arguementCount + 1] = {"./main", "/home/saie/Desktop"};
     char ** pointer = command;
     
-    Executive commandline(arguementCount +1, pointer);
-    EXPECT_DEATH(commandline.getArguments(), "Error: No arguments entered, need 3\nHelp: main [input dir] [temp dir] [output dir]");
+    EXPECT_DEATH({
+        Executive commandline(arguementCount +1, pointer); 
+        commandline.getArguments();
+        }, "Error: 1 argument entered, need 3");
 
 }
 
@@ -45,8 +49,10 @@ TEST(ExecutiveTest, TwoArgument){
     char * command[arguementCount + 1] = {"./main", "/home/saie/Desktop/", "/home/saie/Desktop/"};
     char ** pointer = command;
     
-    Executive commandline(arguementCount +1, pointer);
-    EXPECT_DEATH(commandline.getArguments(), "Error: No arguments entered, need 3\nHelp: main [input dir] [temp dir] [output dir]");
+    EXPECT_DEATH({
+        Executive commandline(arguementCount +1, pointer); 
+        commandline.getArguments();
+        }, "Error: 2 arguments entered, need 3");
 
 }
 
@@ -59,7 +65,20 @@ TEST(ExecutiveTest, ThreeArgument){
     char ** pointer = command;
     vector<string> expected_value{pointer[1], pointer[2], pointer[3]};
     
-    Executive commandline(arguementCount +1, pointer);
+    Executive commandline(arguementCount +1, pointer);        
     EXPECT_EQ(commandline.getArguments(), expected_value);
 
+}
+
+TEST(ExecutiveTest, InvalidPath){
+    
+    // InvalidPath
+    int arguementCount = 3;
+    char * command[arguementCount + 1] = {"./main", "/home/saie/Desktop/", "/home/saie/Desktas/", "/home/saie/Desktop/OODesign/" };
+    char ** pointer = command;
+    
+    EXPECT_DEATH({
+        Executive commandline(arguementCount +1, pointer); 
+        commandline.getArguments();
+        }, "Error invalid path: ");
 }
