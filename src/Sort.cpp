@@ -48,12 +48,12 @@ void Sort::Sorter() {
     }
 
     // Sort the word counts and write them to the output file
-    SortCountsToFile(word_counts);
+    SortCountsToFile(word_counts, output_filename_);
 
 
     ///////////////////////////////////////////////////////////////////////////////
     // print to output_filename 
-    FileManager::writeFile(FileManager::CREATE, output_filename_, result);
+    // FileManager::writeFile(FileManager::CREATE, output_filename_, result);
     // 
     /////////////////////////////////////////////////////////////////////////////////
 
@@ -107,7 +107,7 @@ bool Sort::UpdateWordCounts(map<string, vector<int>>& word_counts) {
     }
 }
 
-void Sort::SortCountsToFile(const map<string, vector<int>>& word_counts) {
+void Sort::SortCountsToFile(const map<string, vector<int>>& word_counts, string outputFilePath) {
     string result; // A string to store the final result
 
     // Create a vector of pairs from the word_counts map and sort it by the size of the value vector in descending order
@@ -136,8 +136,10 @@ void Sort::SortCountsToFile(const map<string, vector<int>>& word_counts) {
         }
     }
 
+    FileManager::writeFile(FileManager::CREATE, outputFilePath, result);
+
     // Print the result string to the console
-    std::cout << result << std::endl;
+    // std::cout << result << std::endl;
 
     
 }
