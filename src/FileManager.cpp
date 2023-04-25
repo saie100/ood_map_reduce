@@ -159,8 +159,6 @@ bool FileManager::writeFile(MODE mode, string outputPath, string filename, strin
 // given the mode (CREATE, APPEND), the file path, and content of the file. 
 // This method returns true if file was successfully written, else returns false 
 bool FileManager::writeFile(MODE mode, string filePath, string content) {
-  // check if filePath is a valid file path
-  if (FileManager::isValid(FILE, filePath)) {
     if (mode == CREATE) {
       // open file in overwrite mode  
       ofstream file(filePath, ios::trunc);  // overwrite mode
@@ -199,11 +197,6 @@ bool FileManager::writeFile(MODE mode, string filePath, string content) {
       return false;
     }
   }
-  // else if the path is not a valid directory path, return false    
-  else {
-    return false;
-  }
-}
 
 // returns a list of files inside a directory
 // parameter dirPath is the path to the directory
