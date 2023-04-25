@@ -51,7 +51,7 @@ void Reduce::reduce(string key, vector<int> intIterator) {
 void Reduce::exportResult(string key, int value) {
   string content = "(" + key + "," + to_string(value) + ")" + "\n";
 
-  string fileName = "output.txt";
+  string fileName = "/output.txt";
 
   bool isSuccessfulWrite =
     FileManager::writeFile(FileManager::APPEND, outputDir, fileName, content);
@@ -89,5 +89,5 @@ bool Reduce::processSortResult() {
 void Reduce::writeSuccess() {
 
   bool isSuccessfulWrite =
-      fileManager.writeFile(FileManager::CREATE, outputDir, "SUCCESS.txt", "SUCCESS");
+      fileManager.writeFile(FileManager::CREATE, outputDir, "/SUCCESS.txt", "SUCCESS");
 }
