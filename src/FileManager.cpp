@@ -58,7 +58,7 @@ bool FileManager::isValid(TYPE type, string path) {
   }
   // else "path" given is an invalid path on computer filesystem
   else {
-    cerr << "Error: Invalid Path: " << path << endl;
+    cerr << "Error invalid path: " << path << endl;
     exit(1);
   }
 };
@@ -109,6 +109,7 @@ string FileManager::getFilename(string path) {
   else {
     return "";
   }
+  return "";
 }
 
 // returns an array of strings given a path to a file 
@@ -148,12 +149,21 @@ array<string, 2> FileManager::readFile(string inputPath) {
   }
 };
 
+// given the mode (CREATE, APPEND), path to output directory, the filename,
+// and content of the file. This method returns true if file was 
+// successfully written to outputDir, else returns false 
 bool FileManager::writeFile(MODE mode, string outputPath, string filename, string content) {
-  // check if the outputPath is a valid directory path
-  if (FileManager::isValid(DIR, outputPath)) {
+  return FileManager::writeFile(mode, outputPath+filename, content);
+}
+
+// given the mode (CREATE, APPEND), the file path, and content of the file. 
+// This method returns true if file was successfully written, else returns false 
+bool FileManager::writeFile(MODE mode, string filePath, string content) {
+  // check if filePath is a valid file path
+  if (FileManager::isValid(FILE, filePath)) {
     if (mode == CREATE) {
       // open file in overwrite mode  
-      ofstream file(outputPath + filename, ios::trunc);  // overwrite mode
+      ofstream file(filePath, ios::trunc);  // overwrite mode
       // if file is open
       if (file.is_open()) {
         // write content to file
@@ -169,7 +179,7 @@ bool FileManager::writeFile(MODE mode, string outputPath, string filename, strin
     } 
     else if (mode == APPEND) {
       // open file in append mode
-      ofstream file(outputPath + filename, ios::app);  // append mode
+      ofstream file(filePath, ios::app);  // append mode
       // if file is open
       if (file.is_open()) {
         // write content to file
@@ -219,6 +229,5 @@ vector<string> FileManager::getFilesFromDir(string dirPath) {
   else {
     cerr << "Error: Invalid Directory Path\n";
     exit(1);
-    return list;
   }
 }
