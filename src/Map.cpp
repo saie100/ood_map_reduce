@@ -5,17 +5,10 @@ Periodically outputs data to a temporary file.
 */
 
 #include "headers/Map.hpp"
+#include "headers/FileManager.h"
 #include <cctype>
 #include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <array>
-
-// #define TEST_STUB
-#ifdef TEST_STUB
-#include <iostream>
-using std::cout;
-#endif
 
 using std::array;
 using std::find_if;
@@ -192,10 +185,6 @@ void Map::map(const string& aKey, const string& aValue) {
             }
         }
 
-#ifdef TEST_STUB
-        cout << "output buffer: " << outputBuffer << "\n";
-#endif
-
         // if the output buffer has over 100 characters in it, export the data to the temporary file
         if (outputBuffer.size() > 100) {
             exportData(aKey, outputBuffer);
@@ -211,66 +200,6 @@ void Map::map(const string& aKey, const string& aValue) {
 
 // exports tokenized values to the disk
 void Map::exportData(const string& aKey, const string& aValue) {
-    // TODO export the data with FileManagement
-    // Initialize the output file stream
-    std::ofstream outfile(outputPath, std::iostream::app);
-    if (!outfile.is_open()) {
-        std::cerr << "Error: could not open output file" << std::endl;
-        return;
-    }
-
-    outfile << aValue;
-
-    // Close the output file stream
-    outfile.close();
+    // write the data to the file
+    FileManager::writeFile(FileManager::MODE::APPEND, outputPath, aKey, aValue);
 }
-
-#ifdef TEST_STUB
-int main() {
-    Map map;
-    map.map("file", "Checking weird words like o'er and 't");
-    // map.map("file", "you're we're they're who're what're when're where're why're how're which're");
-    // Map mapguy;
-    // string testStr = "This here is a string's string, go ahead and buffer this. You're probably going to see who's got apostrophes";
-    // string fileName = "file";
-    // mapguy.map(fileName, testStr);
-    // string allswell = "ACT I\n";
-    // allswell += "SCENE I. Rousillon. The COUNT's palace.\n\n";
-    // allswell += "Enter BERTRAM, the COUNTESS of Rousillon, HELENA, and LAFEU, all in black\n";
-    // allswell += "COUNTESS\n";
-    // allswell += "In delivering my son from me, I bury a second husband.\n";
-    // allswell += "BERTRAM\n";
-    // allswell += "And I in going, madam, weep o'er my father's death\n";
-    // allswell += "anew: but I must attend his majesty's command, to\n";
-    // allswell += "whom I am now in ward, evermore in subjection.\n";
-    // allswell += "LAFEU\n";
-    // allswell += "You shall find of the king a husband, madam; you,\n";
-    // allswell += "sir, a father: he that so generally is at all times\n";
-    // allswell += "good must of necessity hold his virtue to you; whose\n";
-    // allswell += "worthiness would stir it up where it wanted rather\n";
-    // allswell += "than lack it where there is such abundance.\n";
-    // allswell += "COUNTESS\n";
-    // allswell += "What hope is there of his majesty's amendment?\n";
-    // allswell += "LAFEU\n";
-    // allswell += "He hath abandoned his physicians, madam; under whose\n";
-    // allswell += "practises he hath persecuted time with hope, and\n";
-    // allswell += "finds no other advantage in the process but only the\n";
-    // allswell += "losing of hope by time.\n";
-    // allswell += "COUNTESS\n";
-    // allswell += "This young gentlewoman had a father,--O, that\n";
-    // allswell += "'had'! how sad a passage 'tis!--whose skill was\n";
-    // allswell += "almost as great as his honesty; had it stretched so\n";
-    // allswell += "far, would have made nature immortal, and death\n";
-    // allswell += "should have play for lack of work. Would, for the\n";
-    // allswell += "king's sake, he were living! I think it would be\n";
-    // allswell += "the death of the king's disease.\n";
-    // allswell += "LAFEU\n";
-    // allswell += "How called you the man you speak of, madam?\n";
-    // allswell += "COUNTESS\n";
-    // allswell += "He was famous, sir, in his profession, and it was\n";
-    // allswell += "his great right to be so: Gerard de Narbon.\n";
-
-    // fileName = "all's well that end's well";
-    // mapguy.map(fileName, allswell);
-}
-#endif

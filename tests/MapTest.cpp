@@ -16,13 +16,13 @@ using std::vector;
 
 TEST(MapTest, BasicString){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "hey this is a string");
+    map.map("out.txt", "hey this is a string");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -35,13 +35,13 @@ TEST(MapTest, BasicString){
 
 TEST(MapTest, Punctuation){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "this,,,, is.... testing//// punctuation");
+    map.map("out.txt", "this,,,, is.... testing//// punctuation");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -54,13 +54,13 @@ TEST(MapTest, Punctuation){
 
 TEST(MapTest, Whitespace){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "we               have              whitespace");
+    map.map("out.txt", "we               have              whitespace");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -73,13 +73,13 @@ TEST(MapTest, Whitespace){
 
 TEST(MapTest, Newline){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "we\nhave\n newlines");
+    map.map("out.txt", "we\nhave\n newlines");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -92,13 +92,13 @@ TEST(MapTest, Newline){
 
 TEST(MapTest, IsContractions){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "it's he's she's who's what's when's where's why's how's which's this's that's here's there's somebody's someone's something's");
+    map.map("out.txt", "it's he's she's who's what's when's where's why's how's which's this's that's here's there's somebody's someone's something's");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -114,13 +114,13 @@ TEST(MapTest, IsContractions){
 
 TEST(MapTest, AreContractions){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "you're we're they're who're what're when're where're why're how're which're");
+    map.map("out.txt", "you're we're they're who're what're when're where're why're how're which're");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -136,13 +136,13 @@ TEST(MapTest, AreContractions){
 
 TEST(MapTest, DidContractions){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "I'd You'd he'd she'd it'd we'd they'd");
+    map.map("out.txt", "I'd You'd he'd she'd it'd we'd they'd");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -157,13 +157,13 @@ TEST(MapTest, DidContractions){
 
 TEST(MapTest, ImContraction){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "I'm just checking the I'm contraction");
+    map.map("out.txt", "I'm just checking the I'm contraction");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -178,13 +178,13 @@ TEST(MapTest, ImContraction){
 
 TEST(MapTest, WillContraction){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "I'll you'll they'll it'll this'll we'll somebody'll");
+    map.map("out.txt", "I'll you'll they'll it'll this'll we'll somebody'll");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -199,13 +199,13 @@ TEST(MapTest, WillContraction){
 
 TEST(MapTest, HaveContraction){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "I've You've we've they've who've what've how've");
+    map.map("out.txt", "I've You've we've they've who've what've how've");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -220,13 +220,13 @@ TEST(MapTest, HaveContraction){
 
 TEST(MapTest, NotContraction){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "ain't won't can't hasn't mustn't wouldn't shouldn't");
+    map.map("out.txt", "ain't won't can't hasn't mustn't wouldn't shouldn't");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);
@@ -241,13 +241,13 @@ TEST(MapTest, NotContraction){
 
 TEST(MapTest, KeepApostrophe){
 
-    Map map("out.txt");
+    Map map("/temp/");
     // clear out the out file
-    std::ofstream outfile("out.txt");
+    std::ofstream outfile("/temp/out.txt");
     outfile.close();
-    map.map("file", "Checking weird words like o'er and 't");
+    map.map("out.txt", "Checking weird words like o'er and 't");
     
-    std::ifstream infile("out.txt");
+    std::ifstream infile("/temp/out.txt");
     string fileData;
     if (infile.is_open()) {
         getline(infile, fileData);

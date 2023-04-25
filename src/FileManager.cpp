@@ -109,6 +109,7 @@ string FileManager::getFilename(string path) {
   else {
     return "";
   }
+  return "";
 }
 
 // returns an array of strings given a path to a file 
@@ -152,7 +153,7 @@ array<string, 2> FileManager::readFile(string inputPath) {
 // and content of the file. This method returns true if file was 
 // successfully written to outputDir, else returns false 
 bool FileManager::writeFile(MODE mode, string outputPath, string filename, string content) {
-  FileManager::writeFile(mode, outputPath+filename, content);
+  return FileManager::writeFile(mode, outputPath+filename, content);
 }
 
 // given the mode (CREATE, APPEND), the file path, and content of the file. 
