@@ -21,10 +21,6 @@ using std::cout;
 using std::endl;
 using std::getline;
 using std::ifstream;
-using std::regex;
-using std::regex_search;
-using std::smatch;
-using std::sregex_iterator;
 using std::string;
 using std::to_string;
 using std::vector;
@@ -59,27 +55,49 @@ void Reduce::exportResult(string key, int value) {
 
 bool Reduce::processSortResult() {
 
-  smatch match;
-  regex r(R"((\"\w+\"),\s*\[(\d+(,\s*\d+)*)\])");
-
   array<string, 2> inputFile = fileManager.readFile(inputFilePath);
   string line = inputFile[1];
 
-  while (regex_search(line, match, r)) {
-    string word = match[1].str();
-    string ones = match[2].str();
+  size_t leftParen = line.find("(");
 
+  while (leftParen != string::npos){
+    size_t rightParen = line.find(")", leftParen+1);
+    if (rightParen == string::npos){
+      break;
+    }
+
+    string token = line.substr(leftParen+1, rightParen-1);
+
+    size_t commaPos = token.find(",");
+    if (commaPos == string::npos) {
+      break;
+    }
+
+    string word = token.substr(0, commaPos);
+    size_t squareBracketLeft = token.find("[");
+    size_t squareBracketRight = token.find("]");
+
+    if (squareBracketLeft == string::npos || squareBracketRight == string::npos) {
+      break;
+    }
+
+    string numbers = token.substr(squareBracketLeft+1, squareBracketRight-squareBracketLeft-1);
     vector<int> onesList;
-    regex one_r("\\d+");
+    size_t startPos = 0;
 
-    for (sregex_iterator it(ones.begin(), ones.end(), one_r), end_it;
-          it != end_it; ++it) {
-      int num = stoi(it->str());
-      onesList.push_back(num);
+    while (startPos < numbers.size()) {
+      size_t commaPos = numbers.find(",", startPos);
+      if (commaPos == string::npos) {
+          commaPos = numbers.size();
+      }
+      string int_str = numbers.substr(startPos, commaPos-startPos);
+      onesList.push_back(stoi(int_str));
+      startPos = commaPos + 1;
     }
 
     reduce(word, onesList);
-    line = match.suffix();
+    leftParen = line.find("(", rightParen+1);
+
   }
 
   writeSuccess();
@@ -89,5 +107,5 @@ bool Reduce::processSortResult() {
 void Reduce::writeSuccess() {
 
   bool isSuccessfulWrite =
-      fileManager.writeFile(FileManager::CREATE, outputDir, "/SUCCESS.txt", "SUCCESS");
+      fileManager.writeFile(FileManager::CREATE, outputDir, "/SUCCESS.txt", "");
 }
