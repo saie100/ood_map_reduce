@@ -29,6 +29,7 @@ void Workflow::start() {
   Sort s = Sort(tempMapOutputFilePath, tempSortOutputFilePath);
   Reduce r = Reduce(tempSortOutputFilePath, outputDir);
 
+  cout << "Mapping input files..." << endl;
   for (string inputFilePath : inputFilePaths) {
     array<string, 2> inputFile = fm.readFile(inputFilePath);
     string inputFileName = inputFile[0];
@@ -36,8 +37,11 @@ void Workflow::start() {
 
     m.map(inputFileName, inputContent);
   }
+  cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
 
   s.Sorter();
+  cout << "Sorting and aggregating complete!\n" << "Reducing output..." << endl;
 
   r.processSortResult();
+  cout << "Reduce complete!" << endl;
 }
