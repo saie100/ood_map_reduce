@@ -19,7 +19,7 @@ include(GoogleTest)
 include_directories(src/headers/)
 
 # Create main executable
-add_executable(main main.cpp src/Executive.cpp src/FileManager.cpp src/Map.cpp src/Reduce.cpp src/Sort.cpp src/Workflow.cpp)
+add_executable(main src/main.cpp src/Executive.cpp src/FileManager.cpp src/Map.cpp src/Reduce.cpp src/Sort.cpp src/Workflow.cpp)
 
 # Create unit test executables
 add_executable(FileManagerTest tests/FileManagerTest.cpp src/FileManager.cpp)
