@@ -30,6 +30,9 @@ class Reduce {
   */
   void reduce(string key, vector<int> intIterator);
 
+  /**
+   * Process temp file created by sort object.
+  */
   bool processSortResult();
 
  private:
