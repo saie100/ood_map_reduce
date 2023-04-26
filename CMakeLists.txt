@@ -26,11 +26,14 @@ add_executable(FileManagerTest tests/FileManagerTest.cpp src/FileManager.cpp)
 add_executable(ExecutiveTest tests/ExecutiveTest.cpp src/Executive.cpp src/FileManager.cpp)
 add_executable(MapTest tests/MapTest.cpp src/FileManager.cpp src/Map.cpp)
 add_executable(SortTest tests/SortTest.cpp src/FileManager.cpp src/Sort.cpp)
+add_executable(ReduceTest tests/ReduceTest.cpp src/Reduce.cpp src/FileManager.cpp)
+
 
 #target_link_libraries(RunAllTests GTest::gtest) # Custom main function
 target_link_libraries(FileManagerTest GTest::gtest_main) #Google's main function implementation
 target_link_libraries(ExecutiveTest GTest::gtest_main) #Google's main function implementation
 target_link_libraries(MapTest GTest::gtest_main) #Google's main function implementation
 target_link_libraries(SortTest GTest::gtest_main) #Google's main function implementation
+target_link_libraries(ReduceTest GTest::gtest_main) #Google's main function implementation
 
 #gtest_discover_tests(unit_test)
