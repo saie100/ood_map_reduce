@@ -16,7 +16,7 @@ using std::vector;
 
 TEST(MapTest, BasicString){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -35,7 +35,7 @@ TEST(MapTest, BasicString){
 
 TEST(MapTest, Punctuation){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -54,7 +54,7 @@ TEST(MapTest, Punctuation){
 
 TEST(MapTest, Whitespace){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -73,7 +73,7 @@ TEST(MapTest, Whitespace){
 
 TEST(MapTest, Newline){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -92,7 +92,7 @@ TEST(MapTest, Newline){
 
 TEST(MapTest, IsContractions){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -114,7 +114,7 @@ TEST(MapTest, IsContractions){
 
 TEST(MapTest, AreContractions){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -136,7 +136,7 @@ TEST(MapTest, AreContractions){
 
 TEST(MapTest, DidContractions){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -157,7 +157,7 @@ TEST(MapTest, DidContractions){
 
 TEST(MapTest, ImContraction){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -178,7 +178,7 @@ TEST(MapTest, ImContraction){
 
 TEST(MapTest, WillContraction){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -199,7 +199,7 @@ TEST(MapTest, WillContraction){
 
 TEST(MapTest, HaveContraction){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -220,7 +220,7 @@ TEST(MapTest, HaveContraction){
 
 TEST(MapTest, NotContraction){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
@@ -241,7 +241,7 @@ TEST(MapTest, NotContraction){
 
 TEST(MapTest, KeepApostrophe){
 
-    Map map("/temp/");
+    Map map("/temp/out.txt");
     // clear out the out file
     std::ofstream outfile("/temp/out.txt");
     outfile.close();
