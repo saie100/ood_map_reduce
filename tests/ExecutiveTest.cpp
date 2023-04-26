@@ -19,7 +19,9 @@ TEST(ExecutiveTest, NoArgument){
 
     // No Argements
     int arguementCount = 0;
-    char * command[arguementCount + 1] = {"./main"};
+    char * command[arguementCount + 1];
+    string main = "./main";
+    command[0] = main.data();
     char ** pointer = command;
 
     EXPECT_DEATH({
@@ -32,7 +34,12 @@ TEST(ExecutiveTest, OneArgument){
     
     // One Argement
     int arguementCount = 1;
-    char * command[arguementCount + 1] = {"./main", "/home/saie/Desktop"};
+    char * command[arguementCount + 1];
+    string main = "main";
+    string arg1 = "";
+    command[0] = main.data();
+    command[1] = arg1.data();
+
     char ** pointer = command;
     
     EXPECT_DEATH({
@@ -46,7 +53,15 @@ TEST(ExecutiveTest, TwoArgument){
     
     // Two Argements
     int arguementCount = 2;
-    char * command[arguementCount + 1] = {"./main", "/home/saie/Desktop/", "/home/saie/Desktop/"};
+    char * command[arguementCount + 1];
+    string main = "./main";
+    string arg1 = "";
+    string arg2 = "/home/saie/Desktop";
+    
+    command[0] = main.data();
+    command[1] = arg1.data();
+    command[2] = arg1.data();
+
     char ** pointer = command;
     
     EXPECT_DEATH({
@@ -61,7 +76,15 @@ TEST(ExecutiveTest, ThreeArgument){
     
     // Three Argements
     int arguementCount = 3;
-    char * command[arguementCount + 1] = {"./main", "/home/saie/Desktop/", "/home/saie/Desktop/", "/home/saie/Desktop/OODesign/" };
+    char * command[arguementCount + 1];
+    string main = "./main";
+    string arg1 = "/home/saie/Desktop";
+    string arg2 = "/home/saie/Desktop/OODesign/";
+    
+    command[0] = main.data();
+    command[1] = arg1.data();
+    command[2] = arg1.data();
+
     char ** pointer = command;
     vector<string> expected_value{pointer[1], pointer[2], pointer[3]};
     
@@ -70,11 +93,19 @@ TEST(ExecutiveTest, ThreeArgument){
 
 }
 
+
 TEST(ExecutiveTest, InvalidPath){
     
     // InvalidPath
     int arguementCount = 3;
-    char * command[arguementCount + 1] = {"./main", "/home/saie/Desktop/", "/home/saie/Desktas/", "/home/saie/Desktop/OODesign/" };
+    char * command[arguementCount + 1];
+    string main = "./main";
+    string arg1 = "/home/saie/Desktas/";
+    string arg2 = "/home/saie/Desktop/OODesign/";
+    
+    command[0] = main.data();
+    command[1] = arg1.data();
+    command[2] = arg1.data();
     char ** pointer = command;
     
     EXPECT_DEATH({
