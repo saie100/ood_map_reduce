@@ -38,3 +38,4 @@ data/*
 main
 
 build/*
+src/main_vn.cpp
