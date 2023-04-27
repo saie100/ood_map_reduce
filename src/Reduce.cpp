@@ -45,6 +45,9 @@ void Reduce::reduce(string key, vector<int> intIterator) {
 }
 
 void Reduce::exportResult(string key, int value) {
+
+  // Write each result to the final output file in the format of
+  // ("word", integer)
   string content = "(" + key + "," + to_string(value) + ")" + "\n";
 
   string fileName = "/output.txt";
@@ -55,24 +58,30 @@ void Reduce::exportResult(string key, int value) {
 
 bool Reduce::processSortResult() {
 
+  // Parse the intermediate file produced by the sort class
   array<string, 2> inputFile = fileManager.readFile(inputFilePath);
   string line = inputFile[1];
 
+  // Find the first left parenthese
   size_t leftParen = line.find("(");
 
+  // find the first right parenthese
   while (leftParen != string::npos){
     size_t rightParen = line.find(")", leftParen+1);
     if (rightParen == string::npos){
       break;
     }
 
+    // extract the data that's between the two parenthese
     string token = line.substr(leftParen+1, rightParen-1);
 
+    // Find the comma that separates word and integer array
     size_t commaPos = token.find(",");
     if (commaPos == string::npos) {
       break;
     }
 
+    // get the word out of the toekn
     string word = token.substr(0, commaPos);
     size_t squareBracketLeft = token.find("[");
     size_t squareBracketRight = token.find("]");
@@ -81,6 +90,7 @@ bool Reduce::processSortResult() {
       break;
     }
 
+    // Get the ones out of the token
     string numbers = token.substr(squareBracketLeft+1, squareBracketRight-squareBracketLeft-1);
     vector<int> onesList;
     size_t startPos = 0;
@@ -100,6 +110,7 @@ bool Reduce::processSortResult() {
 
   }
 
+  // Write success file once finished parsing input
   writeSuccess();
   return true;
 }
