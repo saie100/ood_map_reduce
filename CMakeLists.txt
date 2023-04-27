@@ -34,6 +34,6 @@ target_link_libraries(FileManagerTest GTest::gtest_main) #Google's main function
 target_link_libraries(ExecutiveTest GTest::gtest_main) #Google's main function implementation
 target_link_libraries(MapTest GTest::gtest_main) #Google's main function implementation
 target_link_libraries(SortTest GTest::gtest_main) #Google's main function implementation
-target_link_libraries(ReduceTest GTest::gtest_main) #Google's main function implementation
+target_link_libraries(ReduceTest GTest::gtest_main GTest::gmock) #Google's main function implementation
 
 #gtest_discover_tests(unit_test)
