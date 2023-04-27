@@ -16,40 +16,35 @@ using std::vector;
 
 TEST(FileManagerTest, InvalidTYPE1){
 
-    string filename= "/home/saie/Desktop/";    
+    string filename= "../test_data/";    
     EXPECT_EQ(FileManager::isValid(FileManager::FILE, filename), false);
 }
 
 TEST(FileManagerTest, InvalidTYPE2){
 
-    string dirName= "/home/saie/Desktop/gradenote.txt";    
+    string dirName= "../test_data/input_data/input1.txt";  
     EXPECT_EQ(FileManager::isValid(FileManager::DIR, dirName), false);
 }
 
 TEST(FileManagerTest, InvalidPath){
 
-    string dirName= "/home/saie/Desktop/dsafdsf";    
+    string dirName= "../test_data/randompath/";    
     EXPECT_DEATH(FileManager::isValid(FileManager::FILE, dirName), "Error invalid path: ");
 }
 
 TEST(FileManagerTest, ValidFilePath){
 
-    string filePath= "/home/saie/Desktop/gradenote.txt";    
+    string filePath= "../test_data/input_data/input1.txt";   
     EXPECT_EQ(FileManager::isValid(FileManager::FILE, filePath), true);
 }
 
-/*
-TEST(FileManagerTest, ReadFromDir){
 
-    system("ls > ./temp/list.temp");
-    system("pwd > location.temp" );
-    
-    array<string, 2> file_list = FileManager::readFile("file_list.temp");
-    array<string, 2> dirPath = FileManager::readFile("location.temp");
+TEST(FileManagerTest, ReadFromFile){
 
-    EXPECT_EQ(FileManager::getFilesFromDir(dirPath), true);
+    array<string,2> file_list = {"sample.txt", "Hello world!"};
+    EXPECT_EQ(FileManager::readFile("../test_data/input_data/sample.txt"), file_list);
 }
 
-*/
+
 
 
