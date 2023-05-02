@@ -223,3 +223,24 @@ vector<string> FileManager::getFilesFromDir(string dirPath) {
     exit(1);
   }
 }
+
+// deltes all text files within a directory
+// parameter dirPath is the path to the directory
+void FileManager::deleteFilesFromDir(string dirPath){
+  if(FileManager::isValid(DIR, dirPath)){
+
+    vector<string> files = FileManager::getFilesFromDir(dirPath);
+
+    for(string item: files){
+      if(item.find(".txt") != string::npos){
+        remove(item.data());
+      }
+    }
+    /*for(int i=0; i<files.size(); i++){
+      if(files[i].find(".txt") != string::npos){
+        remove(files[i].data());
+      }
+    } */
+  }
+  
+}

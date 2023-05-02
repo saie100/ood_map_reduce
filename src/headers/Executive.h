@@ -21,20 +21,26 @@ class Executive {
   // with the value in char **arguments  
   Executive(int argumentCount, char **arguments);
 
-  // return list of arguments
-  vector<string> getArguments();
+  // returns inputDir member variable
+  string getInputDir();
+  
+  // returns tempDir member variable
+  string getTempDir();
+  
+  // returns outputDir member variable
+  string getOutputDir();
+
+  // returns dllDir member variable
+  string getDLLDir();
 
  private:
-  /***************************** Members **************************************/
-  int argumentCount; // stores the number of arguments
-  vector<string> arguments; // stores a list of arguments
+  /***************************** Members Variables **************************************/
+  string inputDir;
+  string tempDir;
+  string outputDir;
+  string dllDir;
   /****************************************************************************/
   
-  /***************************** Methods **************************************/
-  // Add arguements to the member variable list "arguments"
-  void setArguments(int argumentCount, char **arguments);
-  /****************************************************************************/
-
 };
 
 #endif
