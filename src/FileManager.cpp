@@ -228,7 +228,6 @@ vector<string> FileManager::getFilesFromDir(string dirPath) {
 // parameter dirPath is the path to the directory
 void FileManager::deleteFilesFromDir(string dirPath){
   if(FileManager::isValid(DIR, dirPath)){
-
     vector<string> files = FileManager::getFilesFromDir(dirPath);
 
     for(string item: files){
@@ -236,11 +235,6 @@ void FileManager::deleteFilesFromDir(string dirPath){
         remove(item.data());
       }
     }
-    /*for(int i=0; i<files.size(); i++){
-      if(files[i].find(".txt") != string::npos){
-        remove(files[i].data());
-      }
-    } */
   }
   
 }

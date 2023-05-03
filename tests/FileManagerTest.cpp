@@ -45,6 +45,49 @@ TEST(FileManagerTest, ReadFromFile){
     EXPECT_EQ(FileManager::readFile("../test_data/input_data/sample.txt"), file_list);
 }
 
+TEST(FileManagerTest, WriteFile){
+
+    // create a temporary directory for testing
+    system("mkdir temp_test");
+
+    // create three files
+    FileManager::writeFile(FileManager::CREATE, "./temp_test/file1.txt", "hello world 1");
+    FileManager::writeFile(FileManager::CREATE, "./temp_test/file2.txt", "hello world 2");
+    FileManager::writeFile(FileManager::CREATE, "./temp_test/file3.txt", "hello world 3");
+    
+    // verify files were created
+    vector<string> list = {"./temp_test/file1.txt","./temp_test/file2.txt","./temp_test/file3.txt"};
+    EXPECT_EQ(FileManager::getFilesFromDir("./temp_test/"), list);
+    
+    // delete the temporary directory
+    system("rm -R temp_test");
+
+}
+
+TEST(FileManagerTest, DeleteFiles){
+
+    // create a temporary directory for testing
+    system("mkdir temp_test");
+
+    // create three files
+    FileManager::writeFile(FileManager::CREATE, "./temp_test/file1.txt", "hello world 1");
+    FileManager::writeFile(FileManager::CREATE, "./temp_test/file2.txt", "hello world 2");
+    FileManager::writeFile(FileManager::CREATE, "./temp_test/file3.txt", "hello world 3");
+    
+    // verify files were created
+    vector<string> list = {"./temp_test/file1.txt","./temp_test/file2.txt","./temp_test/file3.txt"};
+    EXPECT_EQ(FileManager::getFilesFromDir("./temp_test/"), list);
+    
+    // delete all files from directory
+    FileManager::deleteFilesFromDir("./temp_test/");
+    
+    // verify files were created
+    EXPECT_EQ(FileManager::getFilesFromDir("./temp_test/").empty(), true);
+
+    // delete the temporary directory
+    system("rm -R temp_test");
+}
+
 
 
 
