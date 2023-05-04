@@ -30,15 +30,20 @@ class Executive {
   // returns outputDir member variable
   string getOutputDir();
 
-  // returns dllDir member variable
-  string getDLLDir();
+  // returns reduceDLL member variable
+  string getReduceDLL();
+
+  // returns mapDLL member variable
+  string getMapDLL();
 
  private:
   /***************************** Members Variables **************************************/
   string inputDir;
   string tempDir;
   string outputDir;
-  string dllDir;
+  string reduceDLL;
+  string mapDLL;
+
   /****************************************************************************/
   
 };

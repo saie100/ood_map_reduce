@@ -94,7 +94,7 @@ TEST(ExecutiveTest, ThreeArgument){
     string input = commandline.getInputDir();
     string output = commandline.getOutputDir();
     string temp = commandline.getTempDir();
-    string dll = commandline.getDLLDir();
+    string dll = commandline.getReduceDLL();
     
     EXPECT_EQ(input, "../test_data/input_data/");
     EXPECT_EQ(output, "../test_data/output_data/");

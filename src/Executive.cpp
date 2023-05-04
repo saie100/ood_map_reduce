@@ -20,8 +20,9 @@ Executive::Executive(int argumentCount, char **arguments) {
   // initialize member variables
   this->inputDir = "";
   this->tempDir = "../test_data/temp_data/"; // default temp directory
-  this->outputDir = "";
-  this->dllDir = "";
+  this->outputDir = "../test_data/output_data/"; // default output directory
+  this->reduceDLL = "";
+  this->mapDLL = "";
   
   // loop through arguements and set arguements equal to
   // member variables based on keyword arguments 
@@ -52,12 +53,20 @@ Executive::Executive(int argumentCount, char **arguments) {
         this->outputDir = arguments[i+1];
       }
     }
-    else if(kwarg == "--dllDir"){
+    else if(kwarg == "--reduceDLL"){
       string nextArg = string(arguments[i+1]);
 
       // check if next argument is a valid directory
       if(FileManager::isValid(FileManager::DIR, nextArg)){
-        this->dllDir = arguments[i+1];
+        this->reduceDLL = arguments[i+1];
+      }
+    }
+    else if(kwarg == "--mapDLL"){
+      string nextArg = string(arguments[i+1]);
+
+      // check if next argument is a valid directory
+      if(FileManager::isValid(FileManager::DIR, nextArg)){
+        this->mapDLL = arguments[i+1];
       }
     }
   }
@@ -67,14 +76,14 @@ Executive::Executive(int argumentCount, char **arguments) {
     cerr << "--inputDir keyword argument required" << endl;
     exit(1);
   }
-  // if keyword argument was not provided for outputDir, return error
-  else if(this->outputDir == ""){
-    cerr << "--outputDir keyword argument required" << endl;
+  // if keyword argument was not provided for reduceDLL, return error
+  else if(this->reduceDLL == ""){
+    cerr << "--reduceDLL keyword argument required" << endl;
     exit(1);
   }
-  // if keyword argument was not provided for dllDir, return error
-  else if(this->dllDir == ""){
-    cerr << "--dllDir keyword argument required" << endl;
+  // if keyword argument was not provided for mapDir, return error
+  else if(this->mapDLL == ""){
+    cerr << "--mapDLL keyword argument required" << endl;
     exit(1);
   }
 
@@ -95,8 +104,14 @@ string Executive::getOutputDir(){
   return this->outputDir;
 }
 
-// returns dllDir member variable
-string Executive::getDLLDir(){
-  return this->dllDir;
+// returns reduceDLL member variable
+string Executive::getReduceDLL(){
+  return this->reduceDLL;
 }
+// returns mapDLL member variable
+string Executive::getMapDLL(){
+  return this->mapDLL;
+}
+
+
 
