@@ -1,5 +1,18 @@
 # ood_map_reduce
 
+## Commands to Build Dynamic Link Library (MAC)
+
+```sh
+g++ -std=c++17 -c -fPIC dll/ReduceDll.cpp -o libReduce.o
+g++ -std=c++17 -c -fPIC src/FileManager.cpp -o FileManager.o
+
+g++ -std=c++17 -shared -o libReduce.dylib libReduce.o FileManager.o
+
+g++ -std=c++17 src/main.cpp src/Executive.cpp src/FileManager.cpp src/Map.cpp src/Sort.cpp src/Workflow.cpp -o main
+
+# TODO Run the program.
+```
+
 ## Unit Testing
 This command creates a build folder with generated Makefile. (You should have a CMakeList.txt file in the same directory you run this command)
 ```console
