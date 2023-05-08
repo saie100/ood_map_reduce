@@ -37,9 +37,6 @@ void writeSuccess(FileManager fileManager, string outputDir) {
 
 
 extern "C" void processSortResult(string inputFilePath, string output_dir) {
-
-  cout << "Dynamic Link Library" << endl;
-
   FileManager fileManager;
 
   // Parse the intermediate file produced by the sort class

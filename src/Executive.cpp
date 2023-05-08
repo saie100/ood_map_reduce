@@ -56,16 +56,16 @@ Executive::Executive(int argumentCount, char **arguments) {
     else if(kwarg == "--reduceDLL"){
       string nextArg = string(arguments[i+1]);
 
-      // check if next argument is a valid directory
-      if(FileManager::isValid(FileManager::DIR, nextArg)){
+      // check if next argument is a valid file
+      if(FileManager::isValid(FileManager::FILE, nextArg)){
         this->reduceDLL = arguments[i+1];
       }
     }
     else if(kwarg == "--mapDLL"){
       string nextArg = string(arguments[i+1]);
 
-      // check if next argument is a valid directory
-      if(FileManager::isValid(FileManager::DIR, nextArg)){
+      // check if next argument is a valid file
+      if(FileManager::isValid(FileManager::FILE, nextArg)){
         this->mapDLL = arguments[i+1];
       }
     }
