@@ -13,43 +13,110 @@ using std::endl;
 using std::string;
 using std::vector;
 
-// Inside the constructor, we initialize the member variable "argumentCount"
-// and call setArguements to initialize the member variable "arguments"
-// with the value in char **arguments  
+// Inside the constructor, we initialize the member variables
+// and set variables equal to the values in char **arguments  
 Executive::Executive(int argumentCount, char **arguments) {
-  
-  this->argumentCount = argumentCount; // initialize member variable "argumentCount"
-  setArguments(this->argumentCount, arguments); // initialize member variable "arguemnts"
-};
 
-// Add arguements to the member variable list "arguments"
-void Executive::setArguments(int count, char **auguments) {
+  // initialize member variables
+  this->inputDir = "";
+  this->tempDir = "../test_data/temp_data/"; // default temp directory
+  this->outputDir = "";
+  this->reduceDLL = "";
+  this->mapDLL = "";
   
-  // exit program if there are not 3 arguments
-  if (count == 1) {
-    cerr << "Error: No arguments entered, need 3\nHelp: main [input dir] [temp dir] [output dir]" << endl;
-    exit(1);
-  }
-  else if (count == 2) {
-    cerr << "Error: 1 argument entered, need 3\nHelp: main [input dir] [temp dir] [output dir]" << endl;
-    exit(1);
-  }
-  else if (count == 3) {
-    cerr << "Error: 2 arguments entered, need 3\nHelp: main [input dir] [temp dir] [output dir]" << endl;
-    exit(1);
-  }
-  
-  // Iterate arguments pointer and store arguements in 
-  // member variable list "arguments"
-  for (int i = 1; i < count; i++) {
-    // check if the arguement at specified index is a valid directory 
-    if (FileManager::isValid(FileManager::DIR, auguments[i])) {
-      this->arguments.push_back(auguments[i]); // add argument to list
+  // loop through arguments and set arguments equal to
+  // member variables based on keyword arguments 
+  for(int i=0; i < argumentCount; i++){
+    string kwarg = string(arguments[i]);
+
+    if(kwarg == "--inputDir"){
+      string nextArg = string(arguments[i+1]);
+
+      // check if next argument is a valid directory
+      if(FileManager::isValid(FileManager::DIR, nextArg)){
+        this->inputDir = arguments[i+1];
+      }
+    }
+    else if(kwarg == "--tempDir"){
+      string nextArg = string(arguments[i+1]);
+
+      // check if next argument is a valid directory
+      if(FileManager::isValid(FileManager::DIR, nextArg)){
+        this->tempDir = arguments[i+1];
+      }
+    }
+    else if(kwarg == "--outputDir"){
+      string nextArg = string(arguments[i+1]);
+
+      // check if next argument is a valid directory
+      if(FileManager::isValid(FileManager::DIR, nextArg)){
+        this->outputDir = arguments[i+1];
+      }
+    }
+    else if(kwarg == "--reduceDLL"){
+      string nextArg = string(arguments[i+1]);
+
+      // check if next argument is a valid directory
+      if(FileManager::isValid(FileManager::DIR, nextArg)){
+        this->reduceDLL = arguments[i+1];
+      }
+    }
+    else if(kwarg == "--mapDLL"){
+      string nextArg = string(arguments[i+1]);
+
+      // check if next argument is a valid directory
+      if(FileManager::isValid(FileManager::DIR, nextArg)){
+        this->mapDLL = arguments[i+1];
+      }
     }
   }
-};
 
-// returns member variable list "arguments"
-vector<string> Executive::getArguments() {
-  return this->arguments;
+  // if keyword argument was not provided for inputDir, return error
+  if(this->inputDir == ""){
+    cerr << "--inputDir keyword argument required" << endl;
+    exit(1);
+  }
+  // if keyword argument was not provided for outputDir, return error
+  else if(this->outputDir == ""){
+    cerr << "--outputDir keyword argument required" << endl;
+    exit(1);
+  }
+  // if keyword argument was not provided for reduceDLL, return error
+  else if(this->reduceDLL == ""){
+    cerr << "--reduceDLL keyword argument required" << endl;
+    exit(1);
+  }
+  // if keyword argument was not provided for mapDir, return error
+  else if(this->mapDLL == ""){
+    cerr << "--mapDLL keyword argument required" << endl;
+    exit(1);
+  }
+
 }
+
+// returns inputDir member variable
+string Executive::getInputDir(){
+  return this->inputDir;
+}
+
+// returns tempDir member variable
+string Executive::getTempDir(){
+  return this->tempDir;
+}
+
+// returns outputDir member variable
+string Executive::getOutputDir(){
+  return this->outputDir;
+}
+
+// returns reduceDLL member variable
+string Executive::getReduceDLL(){
+  return this->reduceDLL;
+}
+// returns mapDLL member variable
+string Executive::getMapDLL(){
+  return this->mapDLL;
+}
+
+
+

@@ -15,8 +15,7 @@ using std::array;
 int main(int argc, char ** argv){
 
   Executive commandline(argc, argv);
-  vector<string> files = commandline.getArguments();
-  Workflow wf(files[0], files[1], files[2]);
+  Workflow wf(commandline.getInputDir(), commandline.getTempDir(), commandline.getOutputDir());
   wf.start();
   
   return 0;
