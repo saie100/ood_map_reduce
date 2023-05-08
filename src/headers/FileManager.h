@@ -48,7 +48,7 @@ class FileManager {
   // parameter dirPath is the path to the directory
   static vector<string> getFilesFromDir(string dirPath);
 
-  // deltes all text files within a directory
+  // deletes all text files within a directory
   // parameter dirPath is the path to the directory
   static void deleteFilesFromDir(string dirPath);
 

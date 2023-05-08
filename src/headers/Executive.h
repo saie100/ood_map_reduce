@@ -37,7 +37,7 @@ class Executive {
   string getMapDLL();
 
  private:
-  /***************************** Members Variables **************************************/
+  /***************************** Member Variables **************************************/
   string inputDir;
   string tempDir;
   string outputDir;

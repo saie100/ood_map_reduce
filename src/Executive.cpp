@@ -20,11 +20,11 @@ Executive::Executive(int argumentCount, char **arguments) {
   // initialize member variables
   this->inputDir = "";
   this->tempDir = "../test_data/temp_data/"; // default temp directory
-  this->outputDir = "../test_data/output_data/"; // default output directory
+  this->outputDir = "";
   this->reduceDLL = "";
   this->mapDLL = "";
   
-  // loop through arguements and set arguements equal to
+  // loop through arguments and set arguments equal to
   // member variables based on keyword arguments 
   for(int i=0; i < argumentCount; i++){
     string kwarg = string(arguments[i]);
@@ -74,6 +74,11 @@ Executive::Executive(int argumentCount, char **arguments) {
   // if keyword argument was not provided for inputDir, return error
   if(this->inputDir == ""){
     cerr << "--inputDir keyword argument required" << endl;
+    exit(1);
+  }
+  // if keyword argument was not provided for outputDir, return error
+  else if(this->outputDir == ""){
+    cerr << "--outputDir keyword argument required" << endl;
     exit(1);
   }
   // if keyword argument was not provided for reduceDLL, return error
