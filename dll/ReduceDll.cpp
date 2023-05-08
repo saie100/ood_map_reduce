@@ -7,7 +7,7 @@ using std::to_string;
 using std::cout;
 using std::endl;
 
-extern "C" void exportResult(string key, int value, string outputDir) {
+void exportResult(string key, int value, string outputDir) {
 
   // Write each result to the final output file in the format of
   // ("word", integer)
@@ -19,7 +19,7 @@ extern "C" void exportResult(string key, int value, string outputDir) {
     FileManager::writeFile(FileManager::APPEND, outputDir, fileName, content);
 }
 
-extern "C" void reduce(string key, vector<int> intIterator, string outputDir) {
+void reduce(string key, vector<int> intIterator, string outputDir) {
   // Sum all the values in the list
   int sum = 0;
   for (auto i = intIterator.begin(); i != intIterator.end(); i++) {
@@ -29,7 +29,7 @@ extern "C" void reduce(string key, vector<int> intIterator, string outputDir) {
   exportResult(key, sum, outputDir);
 }
 
-extern "C" void writeSuccess(FileManager fileManager, string outputDir) {
+void writeSuccess(FileManager fileManager, string outputDir) {
 
   bool isSuccessfulWrite =
       fileManager.writeFile(FileManager::CREATE, outputDir, "/SUCCESS.txt", "");
