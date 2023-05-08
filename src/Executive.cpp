@@ -56,8 +56,6 @@ Executive::Executive(int argumentCount, char **arguments) {
     else if(kwarg == "--reduceDLL"){
       string nextArg = string(arguments[i+1]);
 
-      // check if next argument is a valid directory
-      // if(FileManager::isValid(FileManager::DIR, nextArg)){
       this->reduceDLL = arguments[i+1];
       // }
     }
