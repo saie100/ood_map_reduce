@@ -1,7 +1,6 @@
 # ood_map_reduce
 
-## Dynamic Link Library Commands 
-### For Linux
+## Dynamic Link Library Commands (Linux)
 generates object file using source code
 ```console
 g++ [source code(.cpp file)] -c -fPIC
@@ -16,6 +15,19 @@ compiles main.cpp file using dynamic link library. Outputs "main" executable
 ```console
 g++ main.cpp [shared library name(.so file)] -o main -ldl
 ``` 
+
+## Commands to Build Dynamic Link Library (MAC)
+
+```sh
+g++ -std=c++17 -c -fPIC dll/ReduceDll.cpp -o libReduce.o
+g++ -std=c++17 -c -fPIC src/FileManager.cpp -o FileManager.o
+
+g++ -std=c++17 -shared -o libReduce.dylib libReduce.o FileManager.o
+
+g++ -std=c++17 src/main.cpp src/Executive.cpp src/FileManager.cpp src/Map.cpp src/Sort.cpp src/Workflow.cpp -o main
+
+# TODO Run the program.
+```
 
 ## Unit Testing
 This command creates a build folder with generated Makefile. (You should have a CMakeList.txt file in the same directory you run this command)

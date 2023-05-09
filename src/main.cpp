@@ -15,7 +15,13 @@ using std::array;
 int main(int argc, char ** argv){
 
   Executive commandline(argc, argv);
-  Workflow wf(commandline.getInputDir(), commandline.getTempDir(), commandline.getOutputDir());
+  Workflow wf(
+    commandline.getInputDir(),
+    commandline.getTempDir(),
+    commandline.getOutputDir(),
+    commandline.getReduceDLL(),
+    commandline.getMapDLL()
+  );
   wf.start();
   
   return 0;
