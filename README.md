@@ -1,5 +1,22 @@
 # ood_map_reduce
 
+## Dynamic Link Library Commands 
+### For Linux
+generates object file using source code
+```console
+g++ [source code(.cpp file)] -c -fPIC
+``` 
+
+creates shared library using object files as input
+```console
+g++ -shared [object file of source code(.o file)] -o [pick a name for shared library(.so file)]
+``` 
+
+compiles main.cpp file using dynamic link library. Outputs "main" executable
+```console
+g++ main.cpp [shared library name(.so file)] -o main -ldl
+``` 
+
 ## Unit Testing
 This command creates a build folder with generated Makefile. (You should have a CMakeList.txt file in the same directory you run this command)
 ```console
