@@ -1,6 +1,6 @@
 # ood_map_reduce
 
-## Dynamic Link Library Commands (Linux)
+## Commands to Build Dynamic Link Library (Linux)
 generates object file using source code
 ```console
 g++ [source code(.cpp file)] -c -fPIC
