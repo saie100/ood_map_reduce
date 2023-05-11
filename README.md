@@ -16,17 +16,22 @@ compiles main.cpp file using dynamic link library. Outputs "main" executable
 g++ main.cpp [shared library name(.so file)] -o main -ldl
 ``` 
 
-## Commands to Build Dynamic Link Library (MAC)
+## Commands to Build Dynamic Link Library (MAC/Windows)
 
 ```sh
 g++ -std=c++17 -c -fPIC dll/ReduceDll.cpp -o libReduce.o
 g++ -std=c++17 -c -fPIC src/FileManager.cpp -o FileManager.o
 g++ -std=c++17 -c -fPIC dll/Map.cpp -o libMap.o
 
+# mac
 g++ -std=c++17 -shared -o libReduce.dylib libReduce.o FileManager.o
 g++ -std=c++17 -shared -o libMap.dylib libMap.o FileManager.o
 
-g++ -std=c++17 src/main.cpp src/Executive.cpp src/FileManager.cpp src/Map.cpp src/Sort.cpp src/Workflow.cpp -o main
+# windows
+g++ -std=c++17 -shared -o libReduce.dll libReduce.o FileManager.o
+g++ -std=c++17 -shared -o libMap.dll libMap.o FileManager.o
+
+g++ -std=c++17 src/main.cpp src/Executive.cpp src/FileManager.cpp src/Sort.cpp src/Workflow.cpp -o main
 
 ./main --inputDir data/input --tempDir data/temp --outputDir data/output --reduceDLL dll/mac/libReduce.dylib --mapDLL dll/mac/libMap.dylib 
 
