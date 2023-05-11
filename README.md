@@ -21,10 +21,14 @@ g++ main.cpp [shared library name(.so file)] -o main -ldl
 ```sh
 g++ -std=c++17 -c -fPIC dll/ReduceDll.cpp -o libReduce.o
 g++ -std=c++17 -c -fPIC src/FileManager.cpp -o FileManager.o
+g++ -std=c++17 -c -fPIC dll/Map.cpp -o libMap.o
 
 g++ -std=c++17 -shared -o libReduce.dylib libReduce.o FileManager.o
+g++ -std=c++17 -shared -o libMap.dylib libMap.o FileManager.o
 
 g++ -std=c++17 src/main.cpp src/Executive.cpp src/FileManager.cpp src/Map.cpp src/Sort.cpp src/Workflow.cpp -o main
+
+./main --inputDir data/input --tempDir data/temp --outputDir data/output --reduceDLL dll/mac/libReduce.dylib --mapDLL dll/mac/libMap.dylib 
 
 # TODO Run the program.
 ```
