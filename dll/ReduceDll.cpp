@@ -5,12 +5,18 @@
 #include <iostream>
 #include <random>
 #include <map>
+#include <thread>
+#include <chrono>
+#include <sstream>
 
 using std::map;
 using std::stoi;
 using std::to_string;
 using std::cout;
 using std::endl;
+using std::getline;
+using std::istringstream;
+
 
 void exportResult(string key, int value, string outputDir) {
 
@@ -36,7 +42,6 @@ void reduce(string key, vector<int> intIterator, string outputDir) {
   for (auto i = intIterator.begin(); i != intIterator.end(); i++) {
     sum += *i;
   }
-
   exportResult(key, sum, outputDir);
 }
 
@@ -66,27 +71,31 @@ extern "C" void aggregate(string tempDir, string outputDir) {
           if (rightParen == string::npos){
               break;
           }
-          // extract the data that's between the two parenthese
-          string token = line.substr(leftParen+1, rightParen-1);
-          // Find the comma that separates word and integer
-          size_t commaPos = token.find(",");
-          if (commaPos == string::npos) {
-              break;
-          }
+        // extract the data that's between the two parenthese
+        string token = line.substr(leftParen+1, rightParen-leftParen-1);
+        cout << leftParen << " : " << rightParen << endl;
+        cout << token << endl;
+        // std::this_thread::sleep_for(std::chrono::seconds(2));
 
-          // get the word out of the toekn
-          string word = token.substr(0, commaPos);
-          int value = stoi(token.substr(commaPos, rightParen));
-          auto it = result.find(word);
-          if (it != result.end()){
-              // if the key exists
-              int oldValue = result[word];
-              int newValue = oldValue + value;
-              result[word] = newValue;
-          }else{
-              // if the key does not exists
-              result[word] = value;
-          }
+        // Find the comma that separates word and integer
+        size_t commaPos = token.find(",");
+        if (commaPos == string::npos) {
+          break;
+        }
+        // get the word out of the toekn
+        string word = token.substr(0, commaPos);
+        int value = stoi(token.substr(commaPos+1, rightParen));
+        auto it = result.find(word);
+        if (it != result.end()){
+          // if the key exists
+          int oldValue = result[word];
+          int newValue = oldValue + value;
+          result[word] = newValue;
+        }else{
+          // if the key does not exists
+          result[word] = value;
+        }
+        leftParen = line.find("(", rightParen+1);
       }
   }
 
@@ -95,6 +104,7 @@ extern "C" void aggregate(string tempDir, string outputDir) {
 }
 
 string generateRandomId(int length) {
+
   std::string id;
   static const char characters[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   std::random_device random_device;
@@ -108,13 +118,12 @@ string generateRandomId(int length) {
   return id;
 }
 
-
-extern "C" void processSortResult(string inputFilePath, string tempDir, string outputDir) {
+extern "C" void processSortResult(string inputFilePath, string tempDir) {
 
   // inputFilePath should be a single file produced by the mapper process.
   // the sort class should sort this file first
-  string randomID = generateRandomId(9);
-  string sortResultFilePath = tempDir + "/sort/" + randomID + ".txt";
+  // string randomID = generateRandomId(9);
+  string sortResultFilePath = tempDir + "/sort/" + "randomID" + ".txt";
   Sort sort = Sort(inputFilePath, sortResultFilePath);
   sort.Sorter();
 

@@ -90,28 +90,69 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
   }
 }
 
+void reduceProcess(int threadId, string reduceDllPath, string inputDir, string outputFilePath) {
+
+  #ifdef _WIN32
+    // create DLL handles
+    HINSTANCE mapDLL = LoadLibraryA(reduceDllPath.c_str());
+  #else
+    void* ReducelibraryHandle = dlopen(reduceDllPath.c_str(), RTLD_LAZY);
+
+    if (!ReducelibraryHandle) {
+      printf("Error: %s\n", dlerror());
+      exit(1);
+    }
+
+    typedef void (*ProcessSortResult)(const string, const string);
+    typedef void (*Aggregate)(const string, const string);
+
+    ProcessSortResult processSortResult = (ProcessSortResult) dlsym(ReducelibraryHandle, "processSortResult");
+    Aggregate aggregate = (Aggregate) dlsym(ReducelibraryHandle, "aggregate");
+
+    if (!processSortResult || !aggregate) {
+      printf("Error: %s\n", dlerror());
+      exit(1);
+    }
+  #endif
+
+  vector<string> inputFilePaths = FileManager::getFilesFromDir(inputDir);
+  int filesReduced = 0;
+  for (string inputFilePath : inputFilePaths) {
+  
+    //TODO delete the file once we have mapped it
+    auto fileName = FileManager::getFilename(inputFilePath);
+    auto firstUnderscore = fileName.find("_");
+    auto secondUnderscore = fileName.find("_", firstUnderscore + 1);
+    auto threadNum = fileName.substr(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
+
+    if (threadNum == to_string(threadId)) {
+      auto inputFile = FileManager::readFile(inputFilePath);
+      auto threadOutputPath = outputFilePath;
+      size_t period = threadOutputPath.find(".");
+      threadOutputPath = threadOutputPath.substr(0, period);
+      threadOutputPath = threadOutputPath + "_" + to_string(threadId) + "_" + ".txt";
+      auto inputFileName = inputFile[0];
+      auto inputContent = inputFile[1];
+
+    #ifdef _WIN32
+      // use reduce dll to sort and reduce
+      if (mapDLL != NULL) {
+        funcMap map = (funcMap)GetProcAddress(mapDLL, "map");
+        if (map != NULL) {
+          map(inputFileName, inputContent, threadOutputPath);
+        } else {
+          cout << "Map DLL not found" << endl;
+          exit(1);
+        }
+      }
+    #else
+      processSortResult(inputFilePath, threadOutputPath);
+    #endif
+    }
+  }
+}
+
 void Workflow::start() {
-
-#ifdef _WIN32
-  // create DLL handles
-  HINSTANCE reduceDLL = LoadLibraryA(reduceDllPath.c_str());
-#else
-  void* ReducelibraryHandle = dlopen(reduceDllPath.c_str(), RTLD_LAZY);
-
-  if (!ReducelibraryHandle) {
-    printf("Error: %s\n", dlerror());
-    exit(1);
-  }
-
-  typedef void (*ProcessSortResult)(const string, const string);
-
-  ProcessSortResult processSortResult = (ProcessSortResult) dlsym(ReducelibraryHandle, "processSortResult");
-
-  if (!processSortResult) {
-    printf("Error: %s\n", dlerror());
-    exit(1);
-  }
-#endif
 
   FileManager fm = FileManager();
   fm.deleteFilesFromDir(tempDir);
@@ -123,7 +164,7 @@ void Workflow::start() {
   string tempMapOutputFilePath = tempMapOutputDir + "/tempMapOutput.txt";
   string tempSortOutputFilePath = tempDir + "/tempSortOutput.txt";
 
-  Sort s = Sort(tempMapOutputFilePath, tempSortOutputFilePath);
+  // Sort s = Sort(tempMapOutputFilePath, tempSortOutputFilePath);
 
   string partitionsDir = tempDir + "/partitions";
   fm.createDir(partitionsDir);
