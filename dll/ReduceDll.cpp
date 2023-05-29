@@ -178,7 +178,4 @@ extern "C" void processSortResult(string inputFilePath, string tempDir) {
 
   }
 
-  // Write success file once finished parsing input
-  // writeSuccess(fileManager, outputDir);
-
 }
