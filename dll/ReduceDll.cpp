@@ -73,9 +73,6 @@ extern "C" void aggregate(string tempDir, string outputDir) {
           }
         // extract the data that's between the two parenthese
         string token = line.substr(leftParen+1, rightParen-leftParen-1);
-        cout << leftParen << " : " << rightParen << endl;
-        cout << token << endl;
-        // std::this_thread::sleep_for(std::chrono::seconds(2));
 
         // Find the comma that separates word and integer
         size_t commaPos = token.find(",");
@@ -122,8 +119,8 @@ extern "C" void processSortResult(string inputFilePath, string tempDir) {
 
   // inputFilePath should be a single file produced by the mapper process.
   // the sort class should sort this file first
-  // string randomID = generateRandomId(9);
-  string sortResultFilePath = tempDir + "/sort/" + "randomID" + ".txt";
+  string randomID = generateRandomId(9);
+  string sortResultFilePath = tempDir + "/sort/" + randomID + ".txt";
   Sort sort = Sort(inputFilePath, sortResultFilePath);
   sort.Sorter();
 
