@@ -1,8 +1,13 @@
 #include "../src/headers/FileManager.h"
+#include "../src/headers/Sort.h"
 
 #include <vector>
 #include <iostream>
+#include <random>
+#include <map>
 
+using std::map;
+using std::stoi;
 using std::to_string;
 using std::cout;
 using std::endl;
@@ -17,6 +22,12 @@ void exportResult(string key, int value, string outputDir) {
 
   bool isSuccessfulWrite =
     FileManager::writeFile(FileManager::APPEND, outputDir, fileName, content);
+}
+
+void exportResult(map<string, int> result, string outputDir){
+  for (const auto& entry: result){
+    exportResult(entry.first, entry.second, outputDir);
+  }
 }
 
 void reduce(string key, vector<int> intIterator, string outputDir) {
@@ -35,12 +46,82 @@ void writeSuccess(FileManager fileManager, string outputDir) {
       fileManager.writeFile(FileManager::CREATE, outputDir, "/SUCCESS.txt", "");
 }
 
+extern "C" void aggregate(string tempDir, string outputDir) {
 
-extern "C" void processSortResult(string inputFilePath, string output_dir) {
+  FileManager fileManager;
+  vector<string> reduceResultFiles = fileManager.getFilesFromDir(tempDir);
+
+  map<string, int> result;
+
+  for(string reduceResultFile: reduceResultFiles){
+      array<string, 2> inputFile = fileManager.readFile(reduceResultFile);
+      string line = inputFile[1];
+
+      // Find the first left parenthese
+      size_t leftParen = line.find("(");
+
+      // find the first right parenthese
+      while (leftParen != string::npos){
+          size_t rightParen = line.find(")", leftParen+1);
+          if (rightParen == string::npos){
+              break;
+          }
+          // extract the data that's between the two parenthese
+          string token = line.substr(leftParen+1, rightParen-1);
+          // Find the comma that separates word and integer
+          size_t commaPos = token.find(",");
+          if (commaPos == string::npos) {
+              break;
+          }
+
+          // get the word out of the toekn
+          string word = token.substr(0, commaPos);
+          int value = stoi(token.substr(commaPos, rightParen));
+          auto it = result.find(word);
+          if (it != result.end()){
+              // if the key exists
+              int oldValue = result[word];
+              int newValue = oldValue + value;
+              result[word] = newValue;
+          }else{
+              // if the key does not exists
+              result[word] = value;
+          }
+      }
+  }
+
+  exportResult(result, outputDir);
+  writeSuccess(fileManager, outputDir);
+}
+
+string generateRandomId(int length) {
+  std::string id;
+  static const char characters[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  std::random_device random_device;
+  std::mt19937 rng(random_device());
+  std::uniform_int_distribution<int> distribution(0, sizeof(characters) - 2);
+
+  for (int i = 0; i < length; ++i) {
+    id += characters[distribution(rng)];
+  }
+
+  return id;
+}
+
+
+extern "C" void processSortResult(string inputFilePath, string tempDir, string outputDir) {
+
+  // inputFilePath should be a single file produced by the mapper process.
+  // the sort class should sort this file first
+  string randomID = generateRandomId(9);
+  string sortResultFilePath = tempDir + "/sort/" + randomID + ".txt";
+  Sort sort = Sort(inputFilePath, sortResultFilePath);
+  sort.Sorter();
+
   FileManager fileManager;
 
   // Parse the intermediate file produced by the sort class
-  array<string, 2> inputFile = fileManager.readFile(inputFilePath);
+  array<string, 2> inputFile = fileManager.readFile(sortResultFilePath);
   string line = inputFile[1];
 
   // Find the first left parenthese
@@ -86,12 +167,12 @@ extern "C" void processSortResult(string inputFilePath, string output_dir) {
       startPos = commaPos + 1;
     }
 
-    reduce(word, onesList, output_dir);
+    reduce(word, onesList, tempDir+"/reduce");
     leftParen = line.find("(", rightParen+1);
 
   }
 
   // Write success file once finished parsing input
-  writeSuccess(fileManager, output_dir);
+  // writeSuccess(fileManager, outputDir);
 
 }
