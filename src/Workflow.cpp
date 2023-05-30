@@ -84,7 +84,7 @@ void mapProcess(int threadId, int numInputFiles, string mapDllPath, string input
         }
       }
 #else
-      map(inputFileName, inputContent, tempMapOutputFilePath);
+      map(inputFileName, inputContent, threadOutputPath);
 #endif
     }
   }

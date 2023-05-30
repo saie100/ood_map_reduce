@@ -14,6 +14,20 @@ using std::endl;
 using std::string;
 using std::vector;
 
+
+TEST(FileManagerTest, CreateDirTest){
+
+    string test_dir = "./temp_test";
+
+    // create a temporary directory for testing
+    FileManager::createDir("temp_test");
+    
+    EXPECT_EQ(FileManager::isValid(FileManager::DIR, test_dir), true);
+    
+    // delete the temporary directory
+    system("rm -R temp_test");
+}
+
 TEST(FileManagerTest, InvalidTYPE1){
 
     string filename= "../test_data/";    
@@ -63,6 +77,8 @@ TEST(FileManagerTest, WriteFile){
     system("rm -R temp_test");
 
 }
+
+
 
 TEST(FileManagerTest, DeleteFiles){
 

@@ -129,7 +129,7 @@ array<string, 2> FileManager::readFile(string inputPath) {
       string line = "";
       // while we are not at the end of the file
       while (getline(file, line)) {
-        data += line;
+        data += line + "\n";
       }
       // store the name of the file in the first index
       arr[0] = FileManager::getFilename(inputPath);
@@ -240,6 +240,20 @@ bool FileManager::writeFile(MODE mode, string filePath, string content) {
       return false;
     }
   }
+
+// creates a directory given the directory path
+// This method returns true if the directory was successfully created, else returns false 
+bool FileManager::createDir(string dirPath) {
+    auto created_new_directory = fs::create_directory(dirPath);
+  if (not created_new_directory) {
+    // Either creation failed or the directory was already present.
+    return false;
+  }
+  else{
+    true;
+  }
+    
+}
 
 // returns a list of files inside a directory
 // parameter dirPath is the path to the directory
