@@ -28,8 +28,8 @@ typedef void (*funcReduce)(string, string);
 /**
  * Class Constructor specifying directories
  */
-Workflow::Workflow(string input_dir, string temp_dir, string output_dir, string reduce_dll_path, string map_dll_path)
-    : inputDir(input_dir), tempDir(temp_dir), outputDir(output_dir), reduceDllPath(reduce_dll_path), mapDllPath(map_dll_path) {}
+Workflow::Workflow(string input_dir, string temp_dir, string output_dir, string reduce_dll_path, string map_dll_path, int proc_num)
+    : inputDir(input_dir), tempDir(temp_dir), outputDir(output_dir), reduceDllPath(reduce_dll_path), mapDllPath(map_dll_path), procNum(proc_num) {}
 
 mutex mapMutex;
 
@@ -125,13 +125,11 @@ void Workflow::start() {
 
   Sort s = Sort(tempMapOutputFilePath, tempSortOutputFilePath);
 
-  int numProcesses = 10;
-
   string partitionsDir = tempDir + "/partitions";
   fm.createDir(partitionsDir);
   cout << "Mapping input files..." << endl;
   for (string inputFilePath : inputFilePaths) {
-    vector<array<string, 2>> inputFile = fm.partitionFile(inputFilePath, numProcesses);
+    vector<array<string, 2>> inputFile = fm.partitionFile(inputFilePath, procNum);
     for (array<string, 2> partition : inputFile) {
         string inputFileName = partition[0];
         fm.createDir(partitionsDir);
@@ -142,14 +140,14 @@ void Workflow::start() {
     }
   }
 
-  thread mapThreads[numProcesses];
+  thread mapThreads[procNum];
   // Start each thread
-    for (int i = 0; i < numProcesses; ++i) {
+    for (int i = 0; i < procNum; ++i) {
         mapThreads[i] = thread(mapProcess, i, mapDllPath, partitionsDir, tempMapOutputFilePath);
     }
     
     // Wait for each thread to finish
-    for (int i = 0; i < numProcesses; ++i) {
+    for (int i = 0; i < procNum; ++i) {
         mapThreads[i].join();
     }
 //   cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;

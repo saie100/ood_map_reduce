@@ -20,7 +20,8 @@ int main(int argc, char ** argv){
     commandline.getTempDir(),
     commandline.getOutputDir(),
     commandline.getReduceDLL(),
-    commandline.getMapDLL()
+    commandline.getMapDLL(),
+    commandline.getProcNum()
   );
   wf.start();
   

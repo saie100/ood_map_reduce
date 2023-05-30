@@ -39,7 +39,6 @@ class Executive {
   // returns procNum member variable
   int getProcNum();
 
-
  private:
   /***************************** Member Variables **************************************/
   string inputDir;
