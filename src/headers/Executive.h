@@ -36,6 +36,10 @@ class Executive {
   // returns mapDLL member variable
   string getMapDLL();
 
+  // returns procNum member variable
+  int getProcNum();
+
+
  private:
   /***************************** Member Variables **************************************/
   string inputDir;
@@ -43,6 +47,7 @@ class Executive {
   string outputDir;
   string reduceDLL;
   string mapDLL;
+  int procNum;
 
   /****************************************************************************/
   

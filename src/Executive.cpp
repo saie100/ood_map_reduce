@@ -23,6 +23,8 @@ Executive::Executive(int argumentCount, char **arguments) {
   this->outputDir = "";
   this->reduceDLL = "";
   this->mapDLL = "";
+  this->procNum = 2; // default number of process
+  
   
   // loop through arguments and set arguments equal to
   // member variables based on keyword arguments 
@@ -68,6 +70,10 @@ Executive::Executive(int argumentCount, char **arguments) {
       if(FileManager::isValid(FileManager::FILE, nextArg)){
         this->mapDLL = arguments[i+1];
       }
+    }
+    else if(kwarg == "--proc"){
+      // sets procNum to the next arguement
+      this->procNum = std::stoi(arguments[i+1]);
     }
   }
 
@@ -116,6 +122,11 @@ string Executive::getReduceDLL(){
 // returns mapDLL member variable
 string Executive::getMapDLL(){
   return this->mapDLL;
+}
+
+// returns procNum member variable
+int Executive::getProcNum(){
+  return this->procNum;
 }
 
 

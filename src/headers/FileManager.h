@@ -50,6 +50,10 @@ class FileManager {
    // This method returns true if file was successfully written, else returns false 
   static bool writeFile(MODE mode,string filePath, string content);
 
+  // creates a directory given the directory path
+  // This method returns true if the directory was successfully created, else returns false 
+  static bool createDir(string dirPath);
+
   // returns a list of files inside a directory
   // parameter dirPath is the path to the directory
   static vector<string> getFilesFromDir(string dirPath);
