@@ -245,12 +245,12 @@ bool FileManager::writeFile(MODE mode, string filePath, string content) {
 // This method returns true if the directory was successfully created, else returns false 
 bool FileManager::createDir(string dirPath) {
     auto created_new_directory = fs::create_directory(dirPath);
-  if (not created_new_directory) {
+  if (not created_new_directory){
     // Either creation failed or the directory was already present.
     return false;
   }
   else{
-    true;
+    return true;
   }
     
 }
