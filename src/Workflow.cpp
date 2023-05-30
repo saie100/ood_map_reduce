@@ -33,6 +33,7 @@ Workflow::Workflow(string input_dir, string temp_dir, string output_dir, string 
 
 mutex mapMutex;
 
+
 void mapProcess(int threadId, string mapDllPath, string inputDir, string outputFilePath) {
 
 #ifdef _WIN32
@@ -90,7 +91,8 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
   }
 }
 
-void reduceProcess(int threadId, string reduceDllPath, string inputDir, string outputFilePath) {
+
+void reduceProcess(int threadId, string reduceDllPath, string inputDir, string tempDir) {
 
   #ifdef _WIN32
     // create DLL handles
@@ -104,12 +106,10 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string o
     }
 
     typedef void (*ProcessSortResult)(const string, const string);
-    typedef void (*Aggregate)(const string, const string);
 
     ProcessSortResult processSortResult = (ProcessSortResult) dlsym(ReducelibraryHandle, "processSortResult");
-    Aggregate aggregate = (Aggregate) dlsym(ReducelibraryHandle, "aggregate");
 
-    if (!processSortResult || !aggregate) {
+    if (!processSortResult) {
       printf("Error: %s\n", dlerror());
       exit(1);
     }
@@ -127,10 +127,6 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string o
 
     if (threadNum == to_string(threadId)) {
       auto inputFile = FileManager::readFile(inputFilePath);
-      auto threadOutputPath = outputFilePath;
-      size_t period = threadOutputPath.find(".");
-      threadOutputPath = threadOutputPath.substr(0, period);
-      threadOutputPath = threadOutputPath + "_" + to_string(threadId) + "_" + ".txt";
       auto inputFileName = inputFile[0];
       auto inputContent = inputFile[1];
 
@@ -146,7 +142,7 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string o
         }
       }
     #else
-      processSortResult(inputFilePath, threadOutputPath);
+      processSortResult(inputFilePath, tempDir);
     #endif
     }
   }
@@ -154,9 +150,21 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string o
 
 void Workflow::start() {
 
+  void* ReducelibraryHandle = dlopen(reduceDllPath.c_str(), RTLD_LAZY);
+  typedef void (*Aggregate)(const string, const string);
+
+  Aggregate aggregate = (Aggregate) dlsym(ReducelibraryHandle, "aggregate");
+
+  if (!aggregate) {
+    printf("Error: %s\n", dlerror());
+    exit(1);
+  }
+
+  cout << inputDir << "hello there" << endl;
+
   FileManager fm = FileManager();
-  fm.deleteFilesFromDir(tempDir);
-  fm.deleteFilesFromDir(outputDir);
+  // fm.deleteFilesFromDir(tempDir);
+  // fm.deleteFilesFromDir(outputDir);
   vector<string> inputFilePaths = fm.getFilesFromDir(inputDir);
 
   string tempMapOutputDir = tempDir + "/map";
@@ -181,17 +189,30 @@ void Workflow::start() {
     }
   }
 
-  thread mapThreads[procNum];
+  std::vector<std::thread>  mapThreads(numProcesses);
   // Start each thread
-    for (int i = 0; i < procNum; ++i) {
-        mapThreads[i] = thread(mapProcess, i, mapDllPath, partitionsDir, tempMapOutputFilePath);
-    }
-    
-    // Wait for each thread to finish
-    for (int i = 0; i < procNum; ++i) {
-        mapThreads[i].join();
-    }
-//   cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
+  for (int i = 0; i < numProcesses; ++i) {
+      mapThreads[i] = thread(mapProcess, i, inputFilePaths.size(), mapDllPath, tempDir, tempMapOutputFilePath);
+  }
+  
+  // Wait for each thread to finish
+  for (int i = 0; i < numProcesses; ++i) {
+      mapThreads[i].join();
+  }
+  cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
+
+  thread reduceThreads[numProcesses];
+  // Start each thread
+  for (int i = 0; i < numProcesses; ++i) {
+    reduceThreads[i] = thread(reduceProcess, i, reduceDllPath, tempDir + "/map", tempDir);
+  }
+  // Wait for each thread to finish
+  for (int i = 0; i < numProcesses; ++i) {
+    reduceThreads[i].join();
+  }
+  string reduceTempDir = tempDir + "/reduce";
+  aggregate(reduceTempDir, outputDir);
+
 
 //   s.Sorter();
 //   cout << "Sorting and aggregating complete!\n" << "Reducing output..." << endl;
