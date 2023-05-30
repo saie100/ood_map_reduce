@@ -37,3 +37,4 @@ main
 
 build/*
 src/main_vn.cpp
+mac_complie_run.sh
