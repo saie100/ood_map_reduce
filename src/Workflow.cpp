@@ -33,7 +33,29 @@ Workflow::Workflow(string input_dir, string temp_dir, string output_dir, string 
 
 mutex mapMutex;
 
-void mapProcess(int threadId, int numInputFiles, HINSTANCE mapDLL, string inputDir, string outputFilePath) {
+void mapProcess(int threadId, int numInputFiles, string mapDllPath, string inputDir, string outputFilePath) {
+
+#ifdef _WIN32
+  // create DLL handles
+  HINSTANCE mapDLL = LoadLibraryA(mapDllPath.c_str());
+#else
+  void* MaplibraryHandle = dlopen(mapDllPath.c_str(), RTLD_LAZY);
+
+  if (!MaplibraryHandle) {
+    printf("Error: %s\n", dlerror());
+    exit(1);
+  }
+
+  typedef void (*Map)(const string&, const string&, const string&);
+
+  Map map = (Map) dlsym(MaplibraryHandle, "map");
+
+  if (!map) {
+    printf("Error: %s\n", dlerror());
+    exit(1);
+  }
+#endif
+
   vector<string> inputFilePaths = FileManager::getFilesFromDir(inputDir);
   int filesMapped = 0;
   for (string inputFilePath : inputFilePaths) {
@@ -64,13 +86,6 @@ void mapProcess(int threadId, int numInputFiles, HINSTANCE mapDLL, string inputD
 #else
       map(inputFileName, inputContent, tempMapOutputFilePath);
 #endif
-
-    // //TODO figure out how to get it deleted without failing, I dk what's going on here
-    // mapMutex.lock();
-    //     cout << "deleting path " << inputFilePath << endl;
-    //   // Delete the input file now that we're done mapping it
-    //   FileManager::deleteFile(inputFilePath);
-    // mapMutex.unlock();
     }
   }
 }
@@ -79,11 +94,9 @@ void Workflow::start() {
 
 #ifdef _WIN32
   // create DLL handles
-  HINSTANCE mapDLL = LoadLibraryA(mapDllPath.c_str());
   HINSTANCE reduceDLL = LoadLibraryA(reduceDllPath.c_str());
 #else
   void* ReducelibraryHandle = dlopen(reduceDllPath.c_str(), RTLD_LAZY);
-  void* MaplibraryHandle = dlopen(mapDllPath.c_str(), RTLD_LAZY);
 
   if (!ReducelibraryHandle) {
     printf("Error: %s\n", dlerror());
@@ -91,10 +104,8 @@ void Workflow::start() {
   }
 
   typedef void (*ProcessSortResult)(const string, const string);
-  typedef void (*Map)(const string&, const string&, const string&);
 
   ProcessSortResult processSortResult = (ProcessSortResult) dlsym(ReducelibraryHandle, "processSortResult");
-  Map map = (Map) dlsym(MaplibraryHandle, "map");
 
   if (!processSortResult) {
     printf("Error: %s\n", dlerror());
@@ -124,27 +135,12 @@ void Workflow::start() {
         // write the data to the file
         FileManager::writeFile(FileManager::MODE::APPEND, path, inputContent);
     }
-
-// #ifdef _WIN32
-//     // use map dll to map
-//     if (mapDLL != NULL) {
-//       funcMap map = (funcMap)GetProcAddress(mapDLL, "map");
-//       if (map != NULL) {
-//         map(inputFileName, inputContent, tempMapOutputFilePath);
-//       } else {
-//         cout << "Map DLL not found" << endl;
-//         exit(1);
-//       }
-//     }
-// #else
-//     map(inputFileName, inputContent, tempMapOutputFilePath);
-// #endif
   }
 
   thread mapThreads[numProcesses];
   // Start each thread
     for (int i = 0; i < numProcesses; ++i) {
-        mapThreads[i] = thread(mapProcess, i, inputFilePaths.size(), mapDLL, tempDir, tempMapOutputFilePath);
+        mapThreads[i] = thread(mapProcess, i, inputFilePaths.size(), mapDllPath, tempDir, tempMapOutputFilePath);
     }
     
     // Wait for each thread to finish
