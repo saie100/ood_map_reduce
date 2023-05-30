@@ -16,7 +16,15 @@ using std::cout;
 using std::endl;
 using std::getline;
 using std::istringstream;
+using std::vector;
+using std::sort;
+using std::pair;
 
+
+// Helper function to compare map elements by value
+bool compareByValue(const pair<string, int>& a, const pair<string, int>& b) {
+    return a.second > b.second;
+}
 
 void exportResult(string key, int value, string outputDir) {
 
@@ -31,7 +39,10 @@ void exportResult(string key, int value, string outputDir) {
 }
 
 void exportResult(map<string, int> result, string outputDir){
-  for (const auto& entry: result){
+  // sort the final result
+  vector<pair<string, int>> sortedVec(result.begin(), result.end());
+  sort(sortedVec.begin(), sortedVec.end(), compareByValue);
+  for (const auto& entry: sortedVec){
     exportResult(entry.first, entry.second, outputDir);
   }
 }
