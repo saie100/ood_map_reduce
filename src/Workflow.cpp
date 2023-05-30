@@ -33,7 +33,7 @@ Workflow::Workflow(string input_dir, string temp_dir, string output_dir, string 
 
 mutex mapMutex;
 
-void mapProcess(int threadId, int numInputFiles, string mapDllPath, string inputDir, string outputFilePath) {
+void mapProcess(int threadId, string mapDllPath, string inputDir, string outputFilePath) {
 
 #ifdef _WIN32
   // create DLL handles
@@ -118,19 +118,24 @@ void Workflow::start() {
   fm.deleteFilesFromDir(outputDir);
   vector<string> inputFilePaths = fm.getFilesFromDir(inputDir);
 
-  string tempMapOutputFilePath = tempDir + "/tempMapOutput.txt";
+  string tempMapOutputDir = tempDir + "/map";
+  fm.createDir(tempMapOutputDir);
+  string tempMapOutputFilePath = tempMapOutputDir + "/tempMapOutput.txt";
   string tempSortOutputFilePath = tempDir + "/tempSortOutput.txt";
 
   Sort s = Sort(tempMapOutputFilePath, tempSortOutputFilePath);
 
   int numProcesses = 10;
 
+  string partitionsDir = tempDir + "/partitions";
+  fm.createDir(partitionsDir);
   cout << "Mapping input files..." << endl;
   for (string inputFilePath : inputFilePaths) {
     vector<array<string, 2>> inputFile = fm.partitionFile(inputFilePath, numProcesses);
     for (array<string, 2> partition : inputFile) {
         string inputFileName = partition[0];
-        string path = tempDir + "/" + inputFileName;
+        fm.createDir(partitionsDir);
+        string path = partitionsDir + "/" + inputFileName;
         string inputContent = partition[1];
         // write the data to the file
         FileManager::writeFile(FileManager::MODE::APPEND, path, inputContent);
@@ -140,7 +145,7 @@ void Workflow::start() {
   thread mapThreads[numProcesses];
   // Start each thread
     for (int i = 0; i < numProcesses; ++i) {
-        mapThreads[i] = thread(mapProcess, i, inputFilePaths.size(), mapDllPath, tempDir, tempMapOutputFilePath);
+        mapThreads[i] = thread(mapProcess, i, mapDllPath, partitionsDir, tempMapOutputFilePath);
     }
     
     // Wait for each thread to finish
