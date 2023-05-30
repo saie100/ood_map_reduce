@@ -1,0 +1,1 @@
+g++ -std=c++17 src/main.cpp src/Executive.cpp src/Workflow.cpp src/Sort.cpp src/FileManager.cpp -o main

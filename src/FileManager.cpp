@@ -17,6 +17,7 @@ using std::ifstream;
 using std::ios;
 using std::ofstream;
 using std::string;
+using std::to_string;
 using std::vector;
 namespace fs = std::filesystem;
 
@@ -128,7 +129,7 @@ array<string, 2> FileManager::readFile(string inputPath) {
       string line = "";
       // while we are not at the end of the file
       while (getline(file, line)) {
-        data += line;
+        data += line + "\n";
       }
       // store the name of the file in the first index
       arr[0] = FileManager::getFilename(inputPath);
@@ -146,7 +147,50 @@ array<string, 2> FileManager::readFile(string inputPath) {
   else {
     return arr;
   }
-};
+}
+
+vector<array<string,2>> FileManager::partitionFile(string inputPath, int numProcesses) {
+  vector<array<string,2>> vec; // initializing vector that will be returned later
+  // check if the inputPath is a valid file path
+  if (FileManager::isValid(FILE, inputPath)) {
+    for (int i = 0; i < numProcesses; i++) {
+        array<string, 2> arr = {"", ""}; // initializing array that will make up the vector elements
+        // store the name of the file in the first index
+        // Find the . before txt
+        auto fileName = FileManager::getFilename(inputPath);
+        size_t period = fileName.find(".");
+        fileName = fileName.substr(0, period);
+        arr[0] = fileName + "_" + to_string(i) + "_" + ".txt";
+        vec.push_back(arr);
+    }
+    // opens file given path to file
+    ifstream file(inputPath);
+    // if the file is open 
+    if (file.is_open()) {
+      int vecIndex = 0;
+      string line = "";
+      // while we are not at the end of the file
+      while (getline(file, line)) {
+        // store the line in the second index
+        vec[vecIndex][1] += line + "\n";
+        vecIndex++;
+        vecIndex = (vecIndex == numProcesses) ? 0 : vecIndex;
+      }
+      return vec; // return vector
+    }
+    // else if file do not open
+    // return empty vector
+    else {
+      vec.resize(0);
+      return vec;
+    }
+  } 
+  // else if the path is not a valid file path, we return an empty vector  
+  else {
+    vec.resize(0);
+    return vec;
+  }
+}
 
 // given the mode (CREATE, APPEND), path to output directory, the filename,
 // and content of the file. This method returns true if file was 
@@ -197,6 +241,20 @@ bool FileManager::writeFile(MODE mode, string filePath, string content) {
     }
   }
 
+// creates a directory given the directory path
+// This method returns true if the directory was successfully created, else returns false 
+bool FileManager::createDir(string dirPath) {
+    auto created_new_directory = fs::create_directory(dirPath);
+  if (not created_new_directory){
+    // Either creation failed or the directory was already present.
+    return false;
+  }
+  else{
+    return true;
+  }
+    
+}
+
 // returns a list of files inside a directory
 // parameter dirPath is the path to the directory
 vector<string> FileManager::getFilesFromDir(string dirPath) {
@@ -221,5 +279,30 @@ vector<string> FileManager::getFilesFromDir(string dirPath) {
   else {
     cerr << "Error: Invalid Directory Path\n";
     exit(1);
+  }
+}
+
+// deletes the text file at the given path
+// parameter filePath is the path to the file
+void FileManager::deleteFile(string filePath) {
+//   if(FileManager::isValid(FILE, filePath)) {
+    cout << "deleting " << filePath << endl;
+      if(filePath.find(".txt") != string::npos){
+        remove(filePath.data());
+      }
+//   }
+}
+
+// deletes all text files within a directory
+// parameter dirPath is the path to the directory
+void FileManager::deleteFilesFromDir(string dirPath) {
+  if(FileManager::isValid(DIR, dirPath)){
+    vector<string> files = FileManager::getFilesFromDir(dirPath);
+
+    for(string item: files){
+      if(item.find(".txt") != string::npos){
+        remove(item.data());
+      }
+    }
   }
 }

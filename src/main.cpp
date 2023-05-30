@@ -2,8 +2,8 @@
 #include <string>
 #include <array>
 #include <vector>
-#include "src/headers/Executive.h"
-#include "src/headers/Workflow.h"
+#include "headers/Executive.h"
+#include "headers/Workflow.h"
 
 using std::cin;
 using std::cout;
@@ -15,8 +15,13 @@ using std::array;
 int main(int argc, char ** argv){
 
   Executive commandline(argc, argv);
-  vector<string> files = commandline.getArguments();
-  Workflow wf(files[0], files[1], files[1]);
+  Workflow wf(
+    commandline.getInputDir(),
+    commandline.getTempDir(),
+    commandline.getOutputDir(),
+    commandline.getReduceDLL(),
+    commandline.getMapDLL()
+  );
   wf.start();
   
   return 0;

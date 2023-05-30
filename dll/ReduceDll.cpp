@@ -1,50 +1,13 @@
-/**
- * @file Reduce.cpp
- * @author: Varis Nijat
- * CSE 687 Object Oriented Design in C++
- * Syracuse University
- * Project MapReduce
- **/
+#include "../src/headers/FileManager.h"
 
-#include "headers/Reduce.h"
-
-#include <fstream>
-#include <iostream>
-#include <regex>
-#include <string>
 #include <vector>
+#include <iostream>
 
-#include "headers/FileManager.h"
-
-using std::cerr;
+using std::to_string;
 using std::cout;
 using std::endl;
-using std::getline;
-using std::ifstream;
-using std::string;
-using std::to_string;
-using std::vector;
 
-/**
- * Class Constructor specifying output directory
- */
-Reduce::Reduce(string input_file_path, string output_dir) {
-  inputFilePath = input_file_path;
-  outputDir = output_dir;
-  FileManager fileManager;
-}
-
-void Reduce::reduce(string key, vector<int> intIterator) {
-  // Sum all the values in the list
-  int sum = 0;
-  for (auto i = intIterator.begin(); i != intIterator.end(); i++) {
-    sum += *i;
-  }
-
-  exportResult(key, sum);
-}
-
-void Reduce::exportResult(string key, int value) {
+void exportResult(string key, int value, string outputDir) {
 
   // Write each result to the final output file in the format of
   // ("word", integer)
@@ -56,7 +19,25 @@ void Reduce::exportResult(string key, int value) {
     FileManager::writeFile(FileManager::APPEND, outputDir, fileName, content);
 }
 
-bool Reduce::processSortResult() {
+void reduce(string key, vector<int> intIterator, string outputDir) {
+  // Sum all the values in the list
+  int sum = 0;
+  for (auto i = intIterator.begin(); i != intIterator.end(); i++) {
+    sum += *i;
+  }
+
+  exportResult(key, sum, outputDir);
+}
+
+void writeSuccess(FileManager fileManager, string outputDir) {
+
+  bool isSuccessfulWrite =
+      fileManager.writeFile(FileManager::CREATE, outputDir, "/SUCCESS.txt", "");
+}
+
+
+extern "C" void processSortResult(string inputFilePath, string output_dir) {
+  FileManager fileManager;
 
   // Parse the intermediate file produced by the sort class
   array<string, 2> inputFile = fileManager.readFile(inputFilePath);
@@ -105,18 +86,12 @@ bool Reduce::processSortResult() {
       startPos = commaPos + 1;
     }
 
-    reduce(word, onesList);
+    reduce(word, onesList, output_dir);
     leftParen = line.find("(", rightParen+1);
 
   }
 
   // Write success file once finished parsing input
-  writeSuccess();
-  return true;
-}
+  writeSuccess(fileManager, output_dir);
 
-void Reduce::writeSuccess() {
-
-  bool isSuccessfulWrite =
-      fileManager.writeFile(FileManager::CREATE, outputDir, "/SUCCESS.txt", "");
 }

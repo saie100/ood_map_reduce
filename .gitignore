@@ -13,8 +13,6 @@
 
 # Compiled Dynamic libraries
 *.so
-*.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -36,3 +34,6 @@
 
 data/*
 main
+
+build/*
+src/main_vn.cpp

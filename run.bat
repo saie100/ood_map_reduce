@@ -1,0 +1,1 @@
+main.exe --inputDir test_data/input_data/%1/ --tempDir test_data/temp_data/ --outputDir test_data/output_data/ --reduceDLL dll/windows/ReduceLib.dll --mapDLL dll/windows/MapLib.dll
