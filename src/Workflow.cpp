@@ -155,7 +155,7 @@ void Workflow::start() {
     HINSTANCE reduceDLL = LoadLibraryA(reduceDllPath.c_str());
   #else
     void* ReducelibraryHandle = dlopen(reduceDllPath.c_str(), RTLD_LAZY);
-    typedef void (*Aggregate)(const string, const string);
+
     Aggregate aggregate = (Aggregate) dlsym(ReducelibraryHandle, "aggregate");
 
     if (!aggregate) {
@@ -171,9 +171,6 @@ void Workflow::start() {
   fm.createDir(tempMapOutputDir);
   string tempMapOutputFilePath = tempMapOutputDir + "/tempMapOutput.txt";
   string tempSortOutputFilePath = tempDir + "/tempSortOutput.txt";
-
-  // Sort s = Sort(tempMapOutputFilePath, tempSortOutputFilePath);
-
   string partitionsDir = tempDir + "/partitions";
   fm.createDir(partitionsDir);
   cout << "Mapping input files..." << endl;
@@ -189,25 +186,25 @@ void Workflow::start() {
     }
   }
 
-  std::vector<std::thread> mapThreads(numProcesses);
+  std::vector<std::thread> mapThreads(procNum);
   // Start each thread
-  for (int i = 0; i < numProcesses; ++i) {
+  for (int i = 0; i < procNum; ++i) {
       mapThreads[i] = thread(mapProcess, i, mapDllPath, tempDir, tempMapOutputFilePath);
   }
   
   // Wait for each thread to finish
-  for (int i = 0; i < numProcesses; ++i) {
+  for (int i = 0; i < procNum; ++i) {
       mapThreads[i].join();
   }
   cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
 
-  thread reduceThreads[numProcesses];
+  thread reduceThreads[procNum];
   // Start each thread
-  for (int i = 0; i < numProcesses; ++i) {
+  for (int i = 0; i < procNum; ++i) {
     reduceThreads[i] = thread(reduceProcess, i, reduceDllPath, tempDir + "/map", tempDir);
   }
   // Wait for each thread to finish
-  for (int i = 0; i < numProcesses; ++i) {
+  for (int i = 0; i < procNum; ++i) {
     reduceThreads[i].join();
   }
   string reduceTempDir = tempDir + "/reduce";
