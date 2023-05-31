@@ -26,13 +26,11 @@ bool compareByValue(const pair<string, int>& a, const pair<string, int>& b) {
     return a.second > b.second;
 }
 
-void exportResult(string key, int value, string outputDir) {
+void exportResult(string key, int value, string outputDir, string fileName) {
 
   // Write each result to the final output file in the format of
   // ("word", integer)
   string content = "(" + key + "," + to_string(value) + ")" + "\n";
-
-  string fileName = "/output.txt";
 
   bool isSuccessfulWrite =
     FileManager::writeFile(FileManager::APPEND, outputDir, fileName, content);
@@ -43,17 +41,17 @@ void exportResult(map<string, int> result, string outputDir){
   vector<pair<string, int>> sortedVec(result.begin(), result.end());
   sort(sortedVec.begin(), sortedVec.end(), compareByValue);
   for (const auto& entry: sortedVec){
-    exportResult(entry.first, entry.second, outputDir);
+    exportResult(entry.first, entry.second, outputDir, "/output.txt");
   }
 }
 
-void reduce(string key, vector<int> intIterator, string outputDir) {
+void reduce(string key, vector<int> intIterator, string outputDir, string fileName) {
   // Sum all the values in the list
   int sum = 0;
   for (auto i = intIterator.begin(); i != intIterator.end(); i++) {
     sum += *i;
   }
-  exportResult(key, sum, outputDir);
+  exportResult(key, sum, outputDir, fileName);
 }
 
 void writeSuccess(FileManager fileManager, string outputDir) {
@@ -136,6 +134,7 @@ extern "C" void processSortResult(string inputFilePath, string tempDir) {
   sort.Sorter();
 
   FileManager fileManager;
+  string reduceTempOutputFileName = "/" + generateRandomId(10) + ".txt";
 
   // Parse the intermediate file produced by the sort class
   array<string, 2> inputFile = fileManager.readFile(sortResultFilePath);
@@ -184,7 +183,7 @@ extern "C" void processSortResult(string inputFilePath, string tempDir) {
       startPos = commaPos + 1;
     }
 
-    reduce(word, onesList, tempDir+"/reduce");
+    reduce(word, onesList, tempDir+"/reduce", reduceTempOutputFileName);
     leftParen = line.find("(", rightParen+1);
 
   }
