@@ -118,7 +118,6 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string t
   vector<string> inputFilePaths = FileManager::getFilesFromDir(inputDir);
   int filesReduced = 0;
   for (string inputFilePath : inputFilePaths) {
-  
     auto fileName = FileManager::getFilename(inputFilePath);
     auto firstUnderscore = fileName.find("_");
     auto secondUnderscore = fileName.find("_", firstUnderscore + 1);
@@ -225,5 +224,7 @@ if (reduceDLL != NULL) {
 #else
   aggregate(reduceTempDir, outputDir);
 #endif
+
+  cout << "Aggregating complete!" << endl;
 
 }
