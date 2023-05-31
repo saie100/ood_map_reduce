@@ -1,6 +1,7 @@
 #include "../src/headers/FileManager.h"
 #include "../src/headers/Sort.h"
 
+#include <algorithm>
 #include <vector>
 #include <iostream>
 #include <random>
