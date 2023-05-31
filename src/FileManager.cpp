@@ -263,7 +263,7 @@ vector<string> FileManager::getFilesFromDir(string dirPath) {
   // check if the dirPath is a valid directory path
   if (FileManager::isValid(DIR, dirPath)) {
     // iterates through the files and sub-directories within the directory (dirPath)
-    for (const auto& entry : fs::directory_iterator(dirPath)) {
+    for (const auto& entry : fs::recursive_directory_iterator(dirPath)) {
       fs::path outfilename = entry.path(); // retrieves a path
       string outfilename_str = outfilename.string(); // converts the path into a string
       // check if the path is a valid file path
@@ -280,17 +280,6 @@ vector<string> FileManager::getFilesFromDir(string dirPath) {
     cerr << "Error: Invalid Directory Path\n";
     exit(1);
   }
-}
-
-// deletes the text file at the given path
-// parameter filePath is the path to the file
-void FileManager::deleteFile(string filePath) {
-//   if(FileManager::isValid(FILE, filePath)) {
-    cout << "deleting " << filePath << endl;
-      if(filePath.find(".txt") != string::npos){
-        remove(filePath.data());
-      }
-//   }
 }
 
 // deletes all text files within a directory
