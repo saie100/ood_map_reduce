@@ -155,7 +155,7 @@ void Workflow::start() {
     HINSTANCE reduceDLL = LoadLibraryA(reduceDllPath.c_str());
   #else
     void* ReducelibraryHandle = dlopen(reduceDllPath.c_str(), RTLD_LAZY);
-
+    typedef void (*Aggregate)(const string, const string);
     Aggregate aggregate = (Aggregate) dlsym(ReducelibraryHandle, "aggregate");
 
     if (!aggregate) {
