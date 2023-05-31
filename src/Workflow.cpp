@@ -119,7 +119,6 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string t
   int filesReduced = 0;
   for (string inputFilePath : inputFilePaths) {
   
-    //TODO delete the file once we have mapped it
     auto fileName = FileManager::getFilename(inputFilePath);
     auto firstUnderscore = fileName.find("_");
     auto secondUnderscore = fileName.find("_", firstUnderscore + 1);
@@ -173,6 +172,8 @@ void Workflow::start() {
   string tempSortOutputFilePath = tempDir + "/tempSortOutput.txt";
   string partitionsDir = tempDir + "/partitions";
   fm.createDir(partitionsDir);
+  fm.createDir(tempDir + "/sort");
+  fm.createDir(tempDir + "/reduce");
   cout << "Mapping input files..." << endl;
   for (string inputFilePath : inputFilePaths) {
     vector<array<string, 2>> inputFile = fm.partitionFile(inputFilePath, procNum);
