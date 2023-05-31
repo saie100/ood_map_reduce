@@ -96,7 +96,7 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string t
 
   #ifdef _WIN32
     // create DLL handles
-    HINSTANCE mapDLL = LoadLibraryA(reduceDllPath.c_str());
+    HINSTANCE reduceDll = LoadLibraryA(reduceDllPath.c_str());
   #else
     void* ReducelibraryHandle = dlopen(reduceDllPath.c_str(), RTLD_LAZY);
 
@@ -192,7 +192,7 @@ void Workflow::start() {
   std::vector<std::thread>  mapThreads(numProcesses);
   // Start each thread
   for (int i = 0; i < numProcesses; ++i) {
-      mapThreads[i] = thread(mapProcess, i, inputFilePaths.size(), mapDllPath, tempDir, tempMapOutputFilePath);
+      mapThreads[i] = thread(mapProcess, i, mapDllPath, tempDir, tempMapOutputFilePath);
   }
   
   // Wait for each thread to finish
@@ -213,23 +213,4 @@ void Workflow::start() {
   string reduceTempDir = tempDir + "/reduce";
   aggregate(reduceTempDir, outputDir);
 
-
-//   s.Sorter();
-//   cout << "Sorting and aggregating complete!\n" << "Reducing output..." << endl;
-
-// #ifdef _WIN32
-//     // use reduce dll to reduce
-//     if (reduceDLL != NULL) {
-//       funcReduce processSortResult = (funcReduce)GetProcAddress(reduceDLL, "processSortResult");
-//       if (processSortResult != NULL) {
-//         processSortResult(tempSortOutputFilePath, outputDir);
-//       } else {
-//         cout << "Reduce DLL not found" << endl;
-//         exit(1);
-//       }
-//     }
-// #else
-//   processSortResult(tempSortOutputFilePath, outputDir);
-// #endif
-//   cout << "Reduce complete!" << endl;
 }
