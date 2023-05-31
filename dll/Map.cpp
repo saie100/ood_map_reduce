@@ -161,6 +161,7 @@ extern "C" void map(const string& aKey, const string& aValue, const string& aOut
                 foundIdx = distance(tempValue.begin(), it);
             }
         }
+
         string subStr{};
         if (foundIdx == 0) {
             // punctuation or space found at index 0, erase it and continue
@@ -178,17 +179,22 @@ extern "C" void map(const string& aKey, const string& aValue, const string& aOut
         else {
             // punctuation or space found, grab the string
             subStr = tempValue.substr(0, foundIdx);
-            // add the (word, 1) pair to the output buffer
-            outputBuffer += "(\"";
-            // loop through the sub string, adding the word as a lowercase string to the output buffer
-            for (char c : subStr) {
-                outputBuffer += static_cast<char>(tolower(c));
-            }
-            outputBuffer += "\",1)";
-            // erase the word from tempValue
-            tempValue.erase(tempValue.begin(), it);
-            if (tempValue.size() > 0) {
-                // erase the whitespace or punctuation, and trailing s if necessary, then continue
+            if (subStr != "\'") {
+                // add the (word, 1) pair to the output buffer
+                outputBuffer += "(\"";
+                // loop through the sub string, adding the word as a lowercase string to the output buffer
+                for (char c : subStr) {
+                    outputBuffer += static_cast<char>(tolower(c));
+                }
+                outputBuffer += "\",1)";
+                // erase the word from tempValue
+                tempValue.erase(tempValue.begin(), it);
+                if (tempValue.size() > 0) {
+                    // erase the whitespace or punctuation, and trailing s if necessary, then continue
+                    tempValue.erase(0, 1);
+                }
+            } else {
+                // punctuation or space found at index 0, erase it and continue
                 tempValue.erase(0, 1);
             }
         }
