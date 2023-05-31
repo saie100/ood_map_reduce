@@ -160,11 +160,7 @@ void Workflow::start() {
     exit(1);
   }
 
-  cout << inputDir << "hello there" << endl;
-
   FileManager fm = FileManager();
-  // fm.deleteFilesFromDir(tempDir);
-  // fm.deleteFilesFromDir(outputDir);
   vector<string> inputFilePaths = fm.getFilesFromDir(inputDir);
 
   string tempMapOutputDir = tempDir + "/map";

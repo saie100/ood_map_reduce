@@ -88,15 +88,12 @@ extern "C" void aggregate(string tempDir, string outputDir) {
         if (commaPos == string::npos) {
           break;
         }
-        // get the word out of the toekn
+        // get the word out of the token
         string word = token.substr(0, commaPos);
         int value = stoi(token.substr(commaPos+1, rightParen));
         auto it = result.find(word);
         if (it != result.end()){
-          // if the key exists
-          int oldValue = result[word];
-          int newValue = oldValue + value;
-          result[word] = newValue;
+          result[word] += value;
         }else{
           // if the key does not exists
           result[word] = value;
