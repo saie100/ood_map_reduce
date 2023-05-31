@@ -128,7 +128,7 @@ array<string, 2> FileManager::readFile(string inputPath) {
       string line = "";
       // while we are not at the end of the file
       while (getline(file, line)) {
-        data += line;
+        data += line + "\n";
       }
       // store the name of the file in the first index
       arr[0] = FileManager::getFilename(inputPath);
