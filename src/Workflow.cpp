@@ -178,7 +178,6 @@ void Workflow::start() {
     vector<array<string, 2>> inputFile = fm.partitionFile(inputFilePath, procNum);
     for (array<string, 2> partition : inputFile) {
         string inputFileName = partition[0];
-        fm.createDir(partitionsDir);
         string path = partitionsDir + "/" + inputFileName;
         string inputContent = partition[1];
         // write the data to the file
