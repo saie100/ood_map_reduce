@@ -163,6 +163,8 @@ void Workflow::start() {
   #endif
 
   FileManager fm = FileManager();
+  fm.deleteFilesFromDir(tempDir);
+  fm.deleteFilesFromDir(outputDir);
   vector<string> inputFilePaths = fm.getFilesFromDir(inputDir);
 
   string tempMapOutputDir = tempDir + "/map";
