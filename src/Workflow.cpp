@@ -128,8 +128,23 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
   heartbeatThread.join();
 }
 
+// Define the heartbeat interval in seconds (e.g., 5 seconds)
+constexpr int HeartbeatInterval = 5;
+atomic<bool> continueHeartbeat(true); 
+
+void sendHeartbeat(int threadId) {
+    while (continueHeartbeat) {
+        // Send heartbeat message to the controller indicating the current status
+        cout << "Thread " << threadId << " is still running...\n";
+        std::this_thread::sleep_for(std::chrono::seconds(HeartbeatInterval));
+    }
+    cout << "Thread " << threadId << " finished running! \n";
+}
+
 
 void reduceProcess(int threadId, string reduceDllPath, string inputDir, string tempDir) {
+
+  thread heartbeatThread(sendHeartbeat, threadId);
 
   #ifdef _WIN32
     // create DLL handles
@@ -181,6 +196,11 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string t
     #endif
     }
   }
+  // Set the continueHeartbeat variable to false to stop the heartbeat
+  continueHeartbeat = false;
+
+  // Wait for the heartbeat thread to finish
+  heartbeatThread.join();
 }
 
 void Workflow::start() {
