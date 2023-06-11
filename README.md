@@ -1,19 +1,26 @@
 # ood_map_reduce
 
 ## Commands to Build Dynamic Link Library (Linux)
-generates object file using source code
+generates object file using source code<br />
+g++ -std=c++17 -c -fPIC [source code(.cpp file)] -o [output object file(.o file)]
 ```console
-g++ [source code(.cpp file)] -c -fPIC
+g++ -std=c++17 -c -fPIC dll/ReduceDll.cpp -o reduceDLL.o
+g++ -std=c++17 -c -fPIC dll/Map.cpp -o mapDLL.o
+g++ -std=c++17 -c -fPIC src/FileManager.cpp -o FileManager.o
+g++ -std=c++17 -c -fPIC src/Sort.cpp -o Sort.o
 ``` 
 
-creates shared library using object files as input
+creates shared library using object files as input<br />
+g++ -std=c++17 -shared [object file of source code(.o file)] -o [pick a name for shared library(.so file)]
 ```console
-g++ -shared [object file of source code(.o file)] -o [pick a name for shared library(.so file)]
+g++ -std=c++17 -shared reduceDLL.o FileManager.o Sort.o -o dll/linux/libReduce.so
+g++ -std=c++17 -shared mapDLL.o FileManager.o Sort.o -o dll/linux/libMap.so
 ``` 
 
-compiles main.cpp file using dynamic link library. Outputs "main" executable
+compiles main.cpp file. Outputs "main" executable<br />
+g++ -std=c++17 main.cpp -ldl -pthread [source code(.cpp file) and header files(.h file)] -o main
 ```console
-g++ main.cpp [shared library name(.so file)] -o main -ldl
+g++ -std=c++17 src/main.cpp -ldl -pthread src/Executive.cpp src/Workflow.cpp src/Sort.cpp src/FileManager.cpp src/headers/Executive.h src/headers/Workflow.h src/headers/Sort.h src/headers/FileManager.h -o main
 ``` 
 
 ## Commands to Build Dynamic Link Library (MAC/Windows)
