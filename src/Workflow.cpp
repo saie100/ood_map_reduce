@@ -12,6 +12,8 @@
 
 #include "headers/FileManager.h"
 #include "headers/Sort.h"
+#include "headers/Socket.h"
+
 
 using std::cout;
 using std::endl;
@@ -35,117 +37,6 @@ Workflow::Workflow(string input_dir, string temp_dir, string output_dir, string 
 mutex mapMutex;
 
 
-void mapProcess(int threadId, string mapDllPath, string inputDir, string outputFilePath) {
-
-#ifdef _WIN32
-  // create DLL handles
-  HINSTANCE mapDLL = LoadLibraryA(mapDllPath.c_str());
-#else
-  void* MaplibraryHandle = dlopen(mapDllPath.c_str(), RTLD_LAZY);
-
-  if (!MaplibraryHandle) {
-    printf("Error: %s\n", dlerror());
-    exit(1);
-  }
-
-  typedef void (*Map)(const string&, const string&, const string&);
-
-  Map map = (Map) dlsym(MaplibraryHandle, "map");
-
-  if (!map) {
-    printf("Error: %s\n", dlerror());
-    exit(1);
-  }
-#endif
-
-  vector<string> inputFilePaths = FileManager::getFilesFromDir(inputDir);
-  int filesMapped = 0;
-  for (string inputFilePath : inputFilePaths) {
-    auto fileName = FileManager::getFilename(inputFilePath);
-    auto firstUnderscore = fileName.find("_");
-    auto secondUnderscore = fileName.find("_", firstUnderscore + 1);
-    auto threadNum = fileName.substr(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
-    if (threadNum == to_string(threadId)) {
-      auto inputFile = FileManager::readFile(inputFilePath);
-      auto threadOutputPath = outputFilePath;
-      size_t period = threadOutputPath.find(".");
-      threadOutputPath = threadOutputPath.substr(0, period);
-      threadOutputPath = threadOutputPath + "_" + to_string(threadId) + "_" + ".txt";
-      auto inputFileName = inputFile[0];
-      auto inputContent = inputFile[1];
-#ifdef _WIN32
-      // use map dll to map
-      if (mapDLL != NULL) {
-        funcMap map = (funcMap)GetProcAddress(mapDLL, "map");
-        if (map != NULL) {
-          map(inputFileName, inputContent, threadOutputPath);
-        } else {
-          cout << "Map DLL not found" << endl;
-          exit(1);
-        }
-      }
-#else
-      map(inputFileName, inputContent, threadOutputPath);
-#endif
-    }
-  }
-}
-
-
-void reduceProcess(int threadId, string reduceDllPath, string inputDir, string tempDir) {
-
-  #ifdef _WIN32
-    // create DLL handles
-    HINSTANCE reduceDLL = LoadLibraryA(reduceDllPath.c_str());
-  #else
-    void* ReducelibraryHandle = dlopen(reduceDllPath.c_str(), RTLD_LAZY);
-
-    if (!ReducelibraryHandle) {
-      printf("Error: %s\n", dlerror());
-      exit(1);
-    }
-
-    typedef void (*ProcessSortResult)(const string, const string);
-
-    ProcessSortResult processSortResult = (ProcessSortResult) dlsym(ReducelibraryHandle, "processSortResult");
-
-    if (!processSortResult) {
-      printf("Error: %s\n", dlerror());
-      exit(1);
-    }
-  #endif
-
-  vector<string> inputFilePaths = FileManager::getFilesFromDir(inputDir);
-  int filesReduced = 0;
-  for (string inputFilePath : inputFilePaths) {
-    auto fileName = FileManager::getFilename(inputFilePath);
-    auto firstUnderscore = fileName.find("_");
-    auto secondUnderscore = fileName.find("_", firstUnderscore + 1);
-    auto threadNum = fileName.substr(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
-
-    if (threadNum == to_string(threadId)) {
-      auto inputFile = FileManager::readFile(inputFilePath);
-      auto inputFileName = inputFile[0];
-      auto inputContent = inputFile[1];
-
-    #ifdef _WIN32
-      // use reduce dll to sort and reduce
-      if (reduceDLL != NULL) {
-        funcReduce processSortResult = (funcReduce)GetProcAddress(reduceDLL, "processSortResult");
-        if (processSortResult != NULL) {
-          processSortResult(inputFilePath, tempDir);
-        } else {
-          cout << "Reduce DLL not found" << endl;
-          exit(1);
-        }
-      }
-    #else
-      processSortResult(inputFilePath, tempDir);
-    #endif
-    }
-  }
-}
-
 void Workflow::start() {
 
   #ifdef _WIN32
@@ -163,8 +54,6 @@ void Workflow::start() {
   #endif
 
   FileManager fm = FileManager();
-  fm.deleteFilesFromDir(tempDir);
-  fm.deleteFilesFromDir(outputDir);
   vector<string> inputFilePaths = fm.getFilesFromDir(inputDir);
 
   string tempMapOutputDir = tempDir + "/map";
@@ -172,9 +61,16 @@ void Workflow::start() {
   string tempMapOutputFilePath = tempMapOutputDir + "/tempMapOutput.txt";
   string tempSortOutputFilePath = tempDir + "/tempSortOutput.txt";
   string partitionsDir = tempDir + "/partitions";
+  string inputReduceDir = tempDir + "/map";
   fm.createDir(partitionsDir);
   fm.createDir(tempDir + "/sort");
   fm.createDir(tempDir + "/reduce");
+
+  Socket controller("controller", "", "", "", "", "");
+  Socket stub1("stub", mapDllPath, reduceDllPath, inputReduceDir, tempDir, tempMapOutputFilePath);
+  stub1.listenTo(8080, 1);
+
+
   cout << "Mapping input files..." << endl;
   for (string inputFilePath : inputFilePaths) {
     vector<array<string, 2>> inputFile = fm.partitionFile(inputFilePath, procNum);
@@ -187,27 +83,19 @@ void Workflow::start() {
     }
   }
 
-  std::vector<std::thread> mapThreads(procNum);
-  // Start each thread
-  for (int i = 0; i < procNum; ++i) {
-      mapThreads[i] = thread(mapProcess, i, mapDllPath, tempDir, tempMapOutputFilePath);
-  }
-  
-  // Wait for each thread to finish
-  for (int i = 0; i < procNum; ++i) {
-      mapThreads[i].join();
-  }
-  cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
+  controller.connectTo(8080);
 
-  thread reduceThreads[procNum];
-  // Start each thread
-  for (int i = 0; i < procNum; ++i) {
-    reduceThreads[i] = thread(reduceProcess, i, reduceDllPath, tempDir + "/map", tempDir);
+  while(1){
+    controller.sendMessage("start mapper:0,1,2");
+    std::this_thread::sleep_for(std::chrono::milliseconds(7000));
+    controller.sendMessage("start reduce:0,1,2");
+    std::this_thread::sleep_for(std::chrono::milliseconds(7000));    
   }
-  // Wait for each thread to finish
-  for (int i = 0; i < procNum; ++i) {
-    reduceThreads[i].join();
-  }
+
+
+
+  
+  
   string reduceTempDir = tempDir + "/reduce";
 
   cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;

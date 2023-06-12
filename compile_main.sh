@@ -1,1 +1,1 @@
-g++ -std=c++17 src/main.cpp src/Executive.cpp src/Workflow.cpp src/Sort.cpp src/FileManager.cpp src/headers/Executive.h src/headers/Workflow.h src/headers/Sort.h src/headers/FileManager.h -o main -ldl -pthread
+g++ -std=c++17 src/main.cpp src/Executive.cpp src/Socket.cpp src/Workflow.cpp src/Sort.cpp src/FileManager.cpp src/headers/Executive.h src/headers/Workflow.h src/headers/Sort.h src/headers/Socket.h src/headers/FileManager.h -o main -ldl -pthread

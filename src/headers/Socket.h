@@ -12,7 +12,7 @@ class Socket{
 
     public:
         // Socket class constructor
-        Socket(string type);
+        Socket(string type, string mapDLL, string reduceDLL, string inputReduceDir, string tempDir, string outputMapDir);
         
         // Socket class destructor
         ~Socket();
@@ -21,7 +21,7 @@ class Socket{
         // this method is called by the controller & stubs 
         void listenTo(int port_num, int total_connections);
 
-        /// this method connects to a pre-exsiting socket
+        // this method connects to a pre-exsiting socket
         // this method is called by the controller & threads (Map & Reduce)
         void connectTo(int port_num);
             
@@ -42,7 +42,7 @@ class Socket{
         // specifies the type of socket (either stub or controller)
         string type;
 
-        // store all socket connection for latter deletion within destructor
+        // store all socket connection for later deletion within destructor
         vector<int> socket_connection;
         
         mutex locker;
@@ -53,6 +53,12 @@ class Socket{
         // condition variable checks if messageQueue is not empty
         // if message queue is not empty sendThread activates
         std::condition_variable cv;
+
+        string mapDLL;
+        string reduceDLL;
+        string inputReduceDir;
+        string tempDir;
+        string outputMapDir;
         
         
 };

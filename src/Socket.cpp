@@ -12,8 +12,20 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <sstream>
 #include <condition_variable>
 #include "headers/Socket.h"
+#include "headers/Executive.h"
+#include "headers/FileManager.h"
+ 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
+#include "headers/FileManager.h"
+#include "headers/Sort.h"
 
 using std::string;
 using std::cout;
@@ -23,12 +35,153 @@ using std::cerr;
 using std::vector;
 using std::thread;
 using std::mutex;
+using std::to_string;
+
+std::vector<int> convertStringToVector(const std::string& inputString) {
+    std::vector<int> outputVector;
+    // Find the position of the colon ':' in the input string
+    size_t colonPosition = inputString.find(':');
+    // Extract the substring after the colon
+    std::string numbersString = inputString.substr(colonPosition + 1);
+    // Create a stringstream from the numbers substring
+    std::stringstream ss(numbersString);
+    // Loop through each number separated by commas and add it to the output vector
+    std::string numberString;
+    while (std::getline(ss, numberString, ',')) {
+        // Try to convert the number string to an integer
+        try {
+            int number = std::stoi(numberString);
+            outputVector.push_back(number);
+        } catch (const std::exception& e) {
+            std::cerr << "Invalid number format: " << numberString << std::endl;
+            // Handle the error (e.g., skip the number or terminate the function)
+            // You can modify this part according to your specific requirements
+        }
+    }
+    return outputVector;
+}
+
+                    
+
+void mapProcess(int threadId, string mapDllPath, string inputDir, string outputFilePath) {
+
+#ifdef _WIN32
+  // create DLL handles
+  HINSTANCE mapDLL = LoadLibraryA(mapDllPath.c_str());
+#else
+  void* MaplibraryHandle = dlopen(mapDllPath.c_str(), RTLD_LAZY);
+
+  if (!MaplibraryHandle) {
+    printf("Error: %s\n", dlerror());
+    exit(1);
+  }
+
+  typedef void (*Map)(const string&, const string&, const string&);
+
+  Map map = (Map) dlsym(MaplibraryHandle, "map");
+
+  if (!map) {
+    printf("Error: %s\n", dlerror());
+    exit(1);
+  }
+#endif
+
+  vector<string> inputFilePaths = FileManager::getFilesFromDir(inputDir);
+  int filesMapped = 0;
+  for (string inputFilePath : inputFilePaths) {
+    auto fileName = FileManager::getFilename(inputFilePath);
+    auto firstUnderscore = fileName.find("_");
+    auto secondUnderscore = fileName.find("_", firstUnderscore + 1);
+    auto threadNum = fileName.substr(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
+    if (threadNum == to_string(threadId)) {
+      auto inputFile = FileManager::readFile(inputFilePath);
+      auto threadOutputPath = outputFilePath;
+      size_t period = threadOutputPath.find(".");
+      threadOutputPath = threadOutputPath.substr(0, period);
+      threadOutputPath = threadOutputPath + "_" + to_string(threadId) + "_" + ".txt";
+      auto inputFileName = inputFile[0];
+      auto inputContent = inputFile[1];
+#ifdef _WIN32
+      // use map dll to map
+      if (mapDLL != NULL) {
+        funcMap map = (funcMap)GetProcAddress(mapDLL, "map");
+        if (map != NULL) {
+          map(inputFileName, inputContent, threadOutputPath);
+        } else {
+          cout << "Map DLL not found" << endl;
+          exit(1);
+        }
+      }
+#else
+      map(inputFileName, inputContent, threadOutputPath);
+#endif
+    }
+  }
+}
 
 
+void reduceProcess(int threadId, string reduceDllPath, string inputDir, string tempDir) {
+
+  #ifdef _WIN32
+    // create DLL handles
+    HINSTANCE reduceDLL = LoadLibraryA(reduceDllPath.c_str());
+  #else
+    void* ReducelibraryHandle = dlopen(reduceDllPath.c_str(), RTLD_LAZY);
+
+    if (!ReducelibraryHandle) {
+      printf("Error: %s\n", dlerror());
+      exit(1);
+    }
+
+    typedef void (*ProcessSortResult)(const string, const string);
+
+    ProcessSortResult processSortResult = (ProcessSortResult) dlsym(ReducelibraryHandle, "processSortResult");
+
+    if (!processSortResult) {
+      printf("Error: %s\n", dlerror());
+      exit(1);
+    }
+  #endif
+
+  vector<string> inputFilePaths = FileManager::getFilesFromDir(inputDir);
+  int filesReduced = 0;
+  for (string inputFilePath : inputFilePaths) {
+    auto fileName = FileManager::getFilename(inputFilePath);
+    auto firstUnderscore = fileName.find("_");
+    auto secondUnderscore = fileName.find("_", firstUnderscore + 1);
+    auto threadNum = fileName.substr(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
+
+    if (threadNum == to_string(threadId)) {
+      auto inputFile = FileManager::readFile(inputFilePath);
+      auto inputFileName = inputFile[0];
+      auto inputContent = inputFile[1];
+
+    #ifdef _WIN32
+      // use reduce dll to sort and reduce
+      if (reduceDLL != NULL) {
+        funcReduce processSortResult = (funcReduce)GetProcAddress(reduceDLL, "processSortResult");
+        if (processSortResult != NULL) {
+          processSortResult(inputFilePath, tempDir);
+        } else {
+          cout << "Reduce DLL not found" << endl;
+          exit(1);
+        }
+      }
+    #else
+      processSortResult(inputFilePath, tempDir);
+    #endif
+    }
+  }
+}
 
     // Socket class constructor
-    Socket::Socket(string type){
+    Socket::Socket(string type, string mapDLL, string reduceDLL, string inputReduceDir, string tempDir, string outputMapDir){
         this->type = type;
+        this->mapDLL = mapDLL;
+        this->reduceDLL = reduceDLL;
+        this->inputReduceDir = inputReduceDir;
+        this->tempDir = tempDir;
+        this->outputMapDir = outputMapDir;
     };
 
     // Socket class destructor
@@ -168,11 +321,40 @@ using std::mutex;
             int valread = read(new_socket_fd, buffer, sizeof(buffer));
             string str_buf = string(buffer);
             if(this->type == "stub"){
-                if(str_buf.find(stub_msg) != std::string::npos){
-                    cout << "Starting stub!" << endl;
+                if(str_buf.find("start mapper:") != std::string::npos){
+                    // message from controller "start mapper:0,1,2,3    
+                    vector<int> thread_id = convertStringToVector(str_buf);
+                    
+                    cout << thread_id[0] << endl;
+
+                    std::vector<std::thread> mapThreads(thread_id.size());
+                    // Start each thread
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        mapThreads[i] = thread(mapProcess, i, mapDLL, tempDir, outputMapDir);
+                    }
+                    
+                    // Wait for each thread to finish
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        mapThreads[i].join();
+                    }
+                    cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
                 }
-                else if(str_buf.find(stub_msg2) != std::string::npos){
-                    cout << "Stopping stub!" << endl;
+                else if(str_buf.find("start reducer:") != std::string::npos){
+
+                    // message from controller "start reduce:0,1,2,3    
+                    vector<int> thread_id = convertStringToVector(str_buf);
+                    std::vector<std::thread> reduceThreads(thread_id.size());
+                    
+                    // Start each thread
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        reduceThreads[i] = thread(reduceProcess, i, reduceDLL, inputReduceDir, tempDir);
+                    }
+                    // Wait for each thread to finish
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        reduceThreads[i].join();
+                    }
+
+                    cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
                 }
             }
             else if(this->type == "controller"){
