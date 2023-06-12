@@ -31,40 +31,26 @@ typedef void (*Aggregate)(const string, const string);
 
 // Define the heartbeat interval in seconds (e.g., 5 seconds)
 constexpr int HeartbeatInterval = 5;
-vector<bool> continueHeartbeat;
-mutex heartbeatMutex;
 
 /**
  * Class Constructor specifying directories
  */
 Workflow::Workflow(string input_dir, string temp_dir, string output_dir, string reduce_dll_path, string map_dll_path, int proc_num)
     : inputDir(input_dir), tempDir(temp_dir), outputDir(output_dir), reduceDllPath(reduce_dll_path), mapDllPath(map_dll_path), procNum(proc_num) {
-  for (int i = 0; i < procNum; i++) {
-    continueHeartbeat.emplace_back(true);
-  }
 }
 
-void sendHeartbeat(int threadId) {
-  // lock the mutex to check the continue vector
-  heartbeatMutex.lock();
-  // get the value for this thread from the continue vector
-  auto heartbeat = continueHeartbeat[threadId];
-  heartbeatMutex.unlock();
-  while (heartbeat) {
-    // Send heartbeat message to the controller indicating the current status
-    cout << "Thread " << threadId << " is still running...\n";
-    std::this_thread::sleep_for(std::chrono::seconds(HeartbeatInterval));
-    // lock the mutex to check the continue vector
-    heartbeatMutex.lock();
-    // get the value for this thread from the continue vector
-    heartbeat = continueHeartbeat[threadId];
-    heartbeatMutex.unlock();
-  }
-  cout << "Thread " << threadId << " finished running! \n";
+void sendHeartbeat(int threadId, bool *continueHeartbeat) {
+    while (*continueHeartbeat) {
+        // Send heartbeat message to the controller indicating the current status
+        cout << "Thread " << threadId << " is still running...\n";
+        std::this_thread::sleep_for(std::chrono::seconds(HeartbeatInterval));
+    }
+    cout << "Thread " << threadId << " finished running! \n";
 }
 
 void mapProcess(int threadId, string mapDllPath, string inputDir, string outputFilePath) {
-  thread heartbeatThread(sendHeartbeat, threadId);
+  bool continueHeartbeat = true;
+  thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
 #ifdef _WIN32
   // create DLL handles
   HINSTANCE mapDLL = LoadLibraryA(mapDllPath.c_str());
@@ -118,11 +104,7 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
     }
   }
 
-  // lock the mutex to set the value
-  heartbeatMutex.lock();
-  // Set the continueHeartbeat variable to false to stop the heartbeat
-  continueHeartbeat[threadId] = false;
-  heartbeatMutex.unlock();
+  continueHeartbeat = false;
 
   // Wait for the heartbeat thread to finish
   heartbeatThread.join();
@@ -130,7 +112,8 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
 
 void reduceProcess(int threadId, string reduceDllPath, string inputDir, string tempDir) {
 
-  thread heartbeatThread(sendHeartbeat, threadId);
+  bool continueHeartbeat = true;
+  thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
 
   #ifdef _WIN32
     // create DLL handles
@@ -182,12 +165,7 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string t
     #endif
     }
   }
-  // lock the mutex to set the value
-  heartbeatMutex.lock();
-  // Set the continueHeartbeat variable to false to stop the heartbeat
-  continueHeartbeat[threadId] = false;
-  heartbeatMutex.unlock();
-
+  continueHeartbeat = false;
   // Wait for the heartbeat thread to finish
   heartbeatThread.join();
 }
@@ -242,11 +220,6 @@ void Workflow::start() {
       mapThreads[i].join();
   }
   cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
-
-  continueHeartbeat.clear();
-  for (int i = 0; i < procNum; i++) {
-    continueHeartbeat.emplace_back(true);
-  }
 
   thread reduceThreads[procNum];
   // Start each thread
