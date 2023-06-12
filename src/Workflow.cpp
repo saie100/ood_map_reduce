@@ -21,8 +21,6 @@ using std::thread;
 using std::to_string;
 
 #ifdef _WIN32
-typedef void (*funcMap)(const string&, const string&, const string&);
-typedef void (*funcReduce)(string, string);
 typedef void (*Aggregate)(const string, const string);
 #endif
 
@@ -69,7 +67,6 @@ void Workflow::start() {
 
   Socket stub1("stub", mapDllPath, reduceDllPath, inputReduceDir, tempDir, tempMapOutputFilePath);
   stub1.listenTo(8080, 1);
-
 
   cout << "Mapping input files..." << endl;
   for (string inputFilePath : inputFilePaths) {

@@ -1,9 +1,7 @@
-#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <string.h>
-#include <sys/socket.h>
 #include <unistd.h>
 #include <iostream>
 #include <chrono>
@@ -48,6 +46,10 @@ int parseThreadNum(const std::string& inputString) {
     string threadNum = inputString.substr(firstParenthesis + 1, secondParenthesis - firstParenthesis - 1);
     return std::stoi(threadNum);
 }
+#ifdef _WIN32
+typedef void (*funcMap)(const string&, const string&, const string&);
+typedef void (*funcReduce)(string, string);
+#endif
 
 std::vector<int> convertStringToVector(const std::string& inputString) {
     std::vector<int> outputVector;
@@ -224,6 +226,11 @@ Socket::Socket(string type, string mapDLL, string reduceDLL, string inputReduceD
     this->inputReduceDir = inputReduceDir;
     this->tempDir = tempDir;
     this->outputMapDir = outputMapDir;
+#ifdef _WIN32
+    WSADATA wsaData;
+    WORD versionRequested = MAKEWORD(2, 2);
+    WSAStartup(versionRequested, &wsaData);
+#endif
 };
 
 // Socket class destructor
@@ -232,6 +239,9 @@ Socket::~Socket(){
     for(int socket : socket_connection){
         close(socket);
     }
+#ifdef _WIN32
+    WSACleanup(); // Clean up the Winsock library
+#endif
 };
 
 // this method opens a socket and listens to port "port_num"
@@ -241,12 +251,6 @@ void Socket::listenTo(int port_num, int conn_num){
 
     if(socket_fd < 0) {
         cerr << "socket_fd creation failed" << endl;
-        exit(1);
-    } 
-    int opt = 1;
-
-    if( setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) ){
-        cerr << "setsocketopt failed" << endl;
         exit(1);
     }
 
@@ -286,21 +290,19 @@ void Socket::sendThread(int port_num){
     if(socket_fd < 0) {
         cerr << "socket_fd creation failed" << endl;
         exit(1);
-    } 
-    int opt = 1;
-
-    if( setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) ){
-        cerr << "setsocketopt failed" << endl;
-        exit(1);
     }
 
     struct sockaddr_in address;
 
     address.sin_family = AF_INET;
+#ifdef _WIN32
+    address.sin_addr.s_addr = inet_addr("127.0.0.1");
+#else
     address.sin_addr.s_addr = INADDR_ANY;
+#endif
     address.sin_port = htons(port_num);
 
-    int status = connect(socket_fd, (struct sockaddr*)&address, sizeof(address));
+    int status = connect(socket_fd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
     
     if (status < 0) {
         cerr<< "socket connection failed" << endl;

@@ -1,1 +1,1 @@
-g++ -std=c++17 src/main.cpp src/Executive.cpp src/Workflow.cpp src/Sort.cpp src/FileManager.cpp -o main
+g++ -std=c++17 src/main.cpp src/Executive.cpp src/Workflow.cpp src/Sort.cpp src/FileManager.cpp src/Socket.cpp -o main -lws2_32
