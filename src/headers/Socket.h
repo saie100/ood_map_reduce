@@ -2,8 +2,16 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
-
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#else
+#include <dlfcn.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
+#endif
+
 using std::string;
 using std::vector;
 using std::mutex;
