@@ -4,6 +4,8 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <chrono>
+#include <atomic>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -19,6 +21,7 @@ using std::string;
 using std::thread;
 using std::to_string;
 using std::mutex;
+using std::atomic;
 
 #ifdef _WIN32
 typedef void (*funcMap)(const string&, const string&, const string&);
@@ -26,17 +29,42 @@ typedef void (*funcReduce)(string, string);
 typedef void (*Aggregate)(const string, const string);
 #endif
 
+// Define the heartbeat interval in seconds (e.g., 5 seconds)
+constexpr int HeartbeatInterval = 5;
+vector<bool> continueHeartbeat;
+mutex heartbeatMutex;
+
 /**
  * Class Constructor specifying directories
  */
 Workflow::Workflow(string input_dir, string temp_dir, string output_dir, string reduce_dll_path, string map_dll_path, int proc_num)
-    : inputDir(input_dir), tempDir(temp_dir), outputDir(output_dir), reduceDllPath(reduce_dll_path), mapDllPath(map_dll_path), procNum(proc_num) {}
+    : inputDir(input_dir), tempDir(temp_dir), outputDir(output_dir), reduceDllPath(reduce_dll_path), mapDllPath(map_dll_path), procNum(proc_num) {
+  for (int i = 0; i < procNum; i++) {
+    continueHeartbeat.emplace_back(true);
+  }
+}
 
-mutex mapMutex;
-
+void sendMapHeartbeat(int threadId) {
+  // lock the mutex to check the continue vector
+  heartbeatMutex.lock();
+  // get the value for this thread from the continue vector
+  auto heartbeat = continueHeartbeat[threadId];
+  heartbeatMutex.unlock();
+  while (heartbeat) {
+    // Send heartbeat message to the controller indicating the current status
+    cout << "Map Thread " << threadId << " is still running...\n";
+    std::this_thread::sleep_for(std::chrono::seconds(HeartbeatInterval));
+    // lock the mutex to check the continue vector
+    heartbeatMutex.lock();
+    // get the value for this thread from the continue vector
+    heartbeat = continueHeartbeat[threadId];
+    heartbeatMutex.unlock();
+  }
+  cout << "Map Thread " << threadId << " finished running! \n";
+}
 
 void mapProcess(int threadId, string mapDllPath, string inputDir, string outputFilePath) {
-
+  thread heartbeatThread(sendMapHeartbeat, threadId);
 #ifdef _WIN32
   // create DLL handles
   HINSTANCE mapDLL = LoadLibraryA(mapDllPath.c_str());
@@ -89,6 +117,15 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
 #endif
     }
   }
+
+  // lock the mutex to set the value
+  heartbeatMutex.lock();
+  // Set the continueHeartbeat variable to false to stop the heartbeat
+  continueHeartbeat[threadId] = false;
+  heartbeatMutex.unlock();
+
+  // Wait for the heartbeat thread to finish
+  heartbeatThread.join();
 }
 
 
