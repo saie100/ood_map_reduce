@@ -130,7 +130,6 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
 
 // Define the heartbeat interval in seconds (e.g., 5 seconds)
 constexpr int HeartbeatInterval = 5;
-atomic<bool> continueHeartbeat(true); 
 
 void sendHeartbeat(int threadId) {
     while (continueHeartbeat) {
