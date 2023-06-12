@@ -15,6 +15,7 @@
 #include "headers/Socket.h"
 #include "headers/Executive.h"
 #include "headers/FileManager.h"
+#include "headers/Workflow.h"
  
 #ifdef _WIN32
 #include <windows.h>
@@ -34,6 +35,19 @@ using std::vector;
 using std::thread;
 using std::mutex;
 using std::to_string;
+
+string parseThreadStatus(const std::string& inputString){
+    int firstBracket = inputString.find("[");
+    int secondBracket = inputString.find("]", firstBracket + 1);
+    string threadStatus = inputString.substr(firstBracket + 1, secondBracket - firstBracket - 1);
+    return threadStatus;
+}
+int parseThreadNum(const std::string& inputString) {
+    int firstParenthesis = inputString.find("(");
+    int secondParenthesis = inputString.find(")", firstParenthesis + 1);
+    string threadNum = inputString.substr(firstParenthesis + 1, secondParenthesis - firstParenthesis - 1);
+    return std::stoi(threadNum);
+}
 
 std::vector<int> convertStringToVector(const std::string& inputString) {
     std::vector<int> outputVector;
@@ -61,12 +75,18 @@ std::vector<int> convertStringToVector(const std::string& inputString) {
 constexpr int HeartbeatInterval = 5;
 
 void sendHeartbeat(int threadId, bool *continueHeartbeat) {
+    
+    Socket threadSocket("thread", "", "", "", "", "");
+    threadSocket.connectTo(Workflow::controller_port);
+    string message = "";
     while (*continueHeartbeat) {
         // Send heartbeat message to the controller indicating the current status
-        cout << "Thread " << threadId << " is still running...\n";
+        message = "Thread(" + to_string(threadId) + ")[running]";
+        threadSocket.sendMessage(message);
         std::this_thread::sleep_for(std::chrono::seconds(HeartbeatInterval));
     }
-    cout << "Thread " << threadId << " finished running! \n";
+    message = "Thread(" + to_string(threadId) + ")[done]";
+    threadSocket.sendMessage(message);
 }
 
 
@@ -338,55 +358,58 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
     
     // listens for message, then execute functionality based on message receieved
     while(1){
-        
         char buffer[1024];
         int valread = read(new_socket_fd, buffer, sizeof(buffer));
-        string str_buf = string(buffer);
-        if(this->type == "stub"){
-            if(str_buf.find("start mapper:") != std::string::npos){
-                // message from controller "start mapper:0,1,2,3    
-                vector<int> thread_id = convertStringToVector(str_buf);
-                
-                cout << thread_id[0] << endl;
+        if(valread){
+            string str_buf = string(buffer);
+            if(this->type == "stub"){
+                if(str_buf.find("start mapper:") != std::string::npos){
+                    // message from controller "start mapper:0,1,2,3    
+                    vector<int> thread_id = convertStringToVector(str_buf);
+                    
+                    cout << thread_id[0] << endl;
 
-                std::vector<std::thread> mapThreads(thread_id.size());
-                // Start each thread
-                for (int i = 0; i < thread_id.size(); ++i) {
-                    mapThreads[i] = thread(mapProcess, i, mapDLL, tempDir, outputMapDir);
+                    std::vector<std::thread> mapThreads(thread_id.size());
+                    // Start each thread
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        mapThreads[i] = thread(mapProcess, i, mapDLL, tempDir, outputMapDir);
+                    }
+                    
+                    // Wait for each thread to finish
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        mapThreads[i].join();
+                    }
+                    cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
                 }
-                
-                // Wait for each thread to finish
-                for (int i = 0; i < thread_id.size(); ++i) {
-                    mapThreads[i].join();
+                else if(str_buf.find("start reducer:") != std::string::npos){
+
+                    // message from controller "start reduce:0,1,2,3    
+                    vector<int> thread_id = convertStringToVector(str_buf);
+                    std::vector<std::thread> reduceThreads(thread_id.size());
+                    
+                    // Start each thread
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        reduceThreads[i] = thread(reduceProcess, i, reduceDLL, inputReduceDir, tempDir);
+                    }
+                    // Wait for each thread to finish
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        reduceThreads[i].join();
+                    }
+
+                    cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
                 }
-                cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
             }
-            else if(str_buf.find("start reducer:") != std::string::npos){
-
-                // message from controller "start reduce:0,1,2,3    
-                vector<int> thread_id = convertStringToVector(str_buf);
-                std::vector<std::thread> reduceThreads(thread_id.size());
+            else if(this->type == "controller"){
                 
-                // Start each thread
-                for (int i = 0; i < thread_id.size(); ++i) {
-                    reduceThreads[i] = thread(reduceProcess, i, reduceDLL, inputReduceDir, tempDir);
-                }
-                // Wait for each thread to finish
-                for (int i = 0; i < thread_id.size(); ++i) {
-                    reduceThreads[i].join();
-                }
-
-                cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
+                if(str_buf.find("Thread(") != std::string::npos){
+                    int thread_num = parseThreadNum(str_buf);
+                    string thread_status = parseThreadStatus(str_buf);
+                    if(thread_status == "done"){
+                        // set the done value in workflow
+                        cout << "Thread " << thread_num << ": is done" <<endl;
+                    }
+                }   
             }
         }
-        else if(this->type == "controller"){
-            if(str_buf.find(controller_msg1) != std::string::npos){
-                cout << "Do something 1" << endl;
-            }
-            else if(str_buf.find(controller_msg2) != std::string::npos){
-                cout << "Do something 2" << endl;
-            }
-        }
-    }
+    }    
 }
-    

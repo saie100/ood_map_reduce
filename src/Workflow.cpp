@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <thread>
-#include <mutex>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -20,7 +19,6 @@ using std::endl;
 using std::string;
 using std::thread;
 using std::to_string;
-using std::mutex;
 
 #ifdef _WIN32
 typedef void (*funcMap)(const string&, const string&, const string&);
@@ -34,7 +32,6 @@ typedef void (*Aggregate)(const string, const string);
 Workflow::Workflow(string input_dir, string temp_dir, string output_dir, string reduce_dll_path, string map_dll_path, int proc_num)
     : inputDir(input_dir), tempDir(temp_dir), outputDir(output_dir), reduceDllPath(reduce_dll_path), mapDllPath(map_dll_path), procNum(proc_num) {}
 
-mutex mapMutex;
 
 
 void Workflow::start() {
@@ -67,6 +64,9 @@ void Workflow::start() {
   fm.createDir(tempDir + "/reduce");
 
   Socket controller("controller", "", "", "", "", "");
+
+  controller.listenTo(controller_port, procNum);
+
   Socket stub1("stub", mapDllPath, reduceDllPath, inputReduceDir, tempDir, tempMapOutputFilePath);
   stub1.listenTo(8080, 1);
 
@@ -85,20 +85,18 @@ void Workflow::start() {
 
   controller.connectTo(8080);
 
-  while(1){
-    controller.sendMessage("start mapper:0,1,2");
-    std::this_thread::sleep_for(std::chrono::milliseconds(7000));
-    controller.sendMessage("start reduce:0,1,2");
-    std::this_thread::sleep_for(std::chrono::milliseconds(7000));    
-  }
-
-
-
   
+  controller.sendMessage("start mapper:0,1,2");
+  std::this_thread::sleep_for(std::chrono::milliseconds(7000));
+  controller.sendMessage("start reduce:0,1,2");
+  std::this_thread::sleep_for(std::chrono::milliseconds(7000));    
   
+
+
   string reduceTempDir = tempDir + "/reduce";
 
   cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
+
 #ifdef _WIN32
 // use reduce dll to sort and reduce
 if (reduceDLL != NULL) {

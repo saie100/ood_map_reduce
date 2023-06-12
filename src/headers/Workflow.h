@@ -27,6 +27,11 @@ class Workflow{
         Workflow(string input_dir, string temp_dir, string output_dir, string reduce_dll_path, string map_dll_path, int proc_num);
         // void mapProcess(int threadId);
         void start();
+
+        static const int controller_port = 9000;
 };
 
 #endif
+
+
+
