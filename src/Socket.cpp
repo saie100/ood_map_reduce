@@ -1,5 +1,3 @@
-
-
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,9 +57,23 @@ std::vector<int> convertStringToVector(const std::string& inputString) {
     return outputVector;
 }
 
-                    
+// Define the heartbeat interval in seconds (e.g., 5 seconds)
+constexpr int HeartbeatInterval = 5;
+
+void sendHeartbeat(int threadId, bool *continueHeartbeat) {
+    while (*continueHeartbeat) {
+        // Send heartbeat message to the controller indicating the current status
+        cout << "Thread " << threadId << " is still running...\n";
+        std::this_thread::sleep_for(std::chrono::seconds(HeartbeatInterval));
+    }
+    cout << "Thread " << threadId << " finished running! \n";
+}
+
 
 void mapProcess(int threadId, string mapDllPath, string inputDir, string outputFilePath) {
+
+  bool continueHeartbeat = true;
+  thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
 
 #ifdef _WIN32
   // create DLL handles
@@ -115,10 +127,17 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
 #endif
     }
   }
+  continueHeartbeat = false;
+
+  // Wait for the heartbeat thread to finish
+  heartbeatThread.join();
 }
 
 
 void reduceProcess(int threadId, string reduceDllPath, string inputDir, string tempDir) {
+
+  bool continueHeartbeat = true;
+  thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
 
   #ifdef _WIN32
     // create DLL handles
@@ -170,6 +189,11 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string t
     #endif
     }
   }
+
+  continueHeartbeat = false;
+
+  // Wait for the heartbeat thread to finish
+  heartbeatThread.join();
 }
 
 // Socket class constructor
