@@ -4,9 +4,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
-#ifdef _WIN32
-#include <windows.h>
-#else
+#ifndef _WIN32
 #include <dlfcn.h>
 #endif
 
@@ -23,8 +21,6 @@ using std::to_string;
 using std::mutex;
 
 #ifdef _WIN32
-typedef void (*funcMap)(const string&, const string&, const string&);
-typedef void (*funcReduce)(string, string);
 typedef void (*Aggregate)(const string, const string);
 #endif
 
@@ -69,7 +65,6 @@ void Workflow::start() {
   Socket controller("controller", "", "", "", "", "");
   Socket stub1("stub", mapDllPath, reduceDllPath, inputReduceDir, tempDir, tempMapOutputFilePath);
   stub1.listenTo(8080, 1);
-
 
   cout << "Mapping input files..." << endl;
   for (string inputFilePath : inputFilePaths) {
