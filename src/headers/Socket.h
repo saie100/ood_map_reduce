@@ -2,6 +2,7 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <map>
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -35,7 +36,9 @@ class Socket{
             
         // sends message to the pre-established connection
         // this method can only be called by objects that use connectTo
-        void sendMessage(string message);
+        void sendMessage(string message, int port_num);
+
+        //void waitForThreads();
 
         bool sendSignal;
         
@@ -52,15 +55,23 @@ class Socket{
 
         // store all socket connection for later deletion within destructor
         vector<int> socket_connection;
-        
-        mutex locker;
 
         // stores messages for the sendThread to use
         vector <string> messageQueue;
         
+        std::map <int, vector<string>> port_to_queue;
+        
         // condition variable checks if messageQueue is not empty
         // if message queue is not empty sendThread activates
         std::condition_variable cv;
+
+        //std::condition_variable thread_wait_cv;
+        
+        //int controller_thread_count;
+
+
+        //bool controller_terminate;
+        //bool controller_stop;
 
         string mapDLL;
         string reduceDLL;

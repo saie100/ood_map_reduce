@@ -66,7 +66,10 @@ void Workflow::start() {
   controller.listenTo(controller_port, procNum);
 
   Socket stub1("stub", mapDllPath, reduceDllPath, inputReduceDir, tempDir, tempMapOutputFilePath);
+  //Socket stub2("stub", mapDllPath, reduceDllPath, inputReduceDir, tempDir, tempMapOutputFilePath);
   stub1.listenTo(8080, 1);
+  //stub2.listenTo(8082, 1);
+  
 
   cout << "Mapping input files..." << endl;
   for (string inputFilePath : inputFilePaths) {
@@ -82,11 +85,13 @@ void Workflow::start() {
 
   controller.connectTo(8080);
 
+  controller.sendMessage("start mapper:0,1,2,3,4,5,6,7,8,9", 8080); // port 8080
+  //std::this_thread::sleep_for(std::chrono::milliseconds(7000));
+  //controller.waitForThreads();
   
-  controller.sendMessage("start mapper:0,1,2");
+  controller.sendMessage("start reducer:0,1,2,3,4,5,6,7,8,9", 8080); // port 8080
   std::this_thread::sleep_for(std::chrono::milliseconds(7000));
-  controller.sendMessage("start reduce:0,1,2");
-  std::this_thread::sleep_for(std::chrono::milliseconds(7000));    
+  controller.sendMessage("do not do anything please", 8080); // port 8080
   
 
 

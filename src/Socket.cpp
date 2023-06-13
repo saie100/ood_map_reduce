@@ -76,7 +76,7 @@ std::vector<int> convertStringToVector(const std::string& inputString) {
 // Define the heartbeat interval in seconds (e.g., 5 seconds)
 constexpr int HeartbeatInterval = 5;
 
-void sendHeartbeat(int threadId, bool *continueHeartbeat) {
+/*void sendHeartbeat(int threadId, bool *continueHeartbeat) {
     
     Socket threadSocket("thread", "", "", "", "", "");
     threadSocket.connectTo(Workflow::controller_port);
@@ -84,18 +84,18 @@ void sendHeartbeat(int threadId, bool *continueHeartbeat) {
     while (*continueHeartbeat) {
         // Send heartbeat message to the controller indicating the current status
         message = "Thread(" + to_string(threadId) + ")[running]";
-        threadSocket.sendMessage(message);
+        threadSocket.sendMessage(message, Workflow::controller_port);
         std::this_thread::sleep_for(std::chrono::seconds(HeartbeatInterval));
     }
     message = "Thread(" + to_string(threadId) + ")[done]";
-    threadSocket.sendMessage(message);
+    threadSocket.sendMessage(message, Workflow::controller_port);
 }
-
+*/
 
 void mapProcess(int threadId, string mapDllPath, string inputDir, string outputFilePath) {
 
   bool continueHeartbeat = true;
-  thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
+  //thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
 
 #ifdef _WIN32
   // create DLL handles
@@ -152,14 +152,14 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
   continueHeartbeat = false;
 
   // Wait for the heartbeat thread to finish
-  heartbeatThread.join();
+  //heartbeatThread.join();
 }
 
 
 void reduceProcess(int threadId, string reduceDllPath, string inputDir, string tempDir) {
 
   bool continueHeartbeat = true;
-  thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
+  //thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
 
   #ifdef _WIN32
     // create DLL handles
@@ -215,7 +215,7 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string t
   continueHeartbeat = false;
 
   // Wait for the heartbeat thread to finish
-  heartbeatThread.join();
+  //heartbeatThread.join();
 }
 
 // Socket class constructor
@@ -226,6 +226,10 @@ Socket::Socket(string type, string mapDLL, string reduceDLL, string inputReduceD
     this->inputReduceDir = inputReduceDir;
     this->tempDir = tempDir;
     this->outputMapDir = outputMapDir;
+    //this->controller_stop = true;
+    //this->controller_terminate = false;
+    //this->controller_thread_count = 0;
+    
 #ifdef _WIN32
     WSADATA wsaData;
     WORD versionRequested = MAKEWORD(2, 2);
@@ -234,6 +238,7 @@ Socket::Socket(string type, string mapDLL, string reduceDLL, string inputReduceD
 };
 
 // Socket class destructor
+
 Socket::~Socket(){
     // close all opened sockets
     for(int socket : socket_connection){
@@ -243,6 +248,8 @@ Socket::~Socket(){
     WSACleanup(); // Clean up the Winsock library
 #endif
 };
+
+
 
 // this method opens a socket and listens to port "port_num"
 // this method is called by the stubs and controller 
@@ -302,7 +309,8 @@ void Socket::sendThread(int port_num){
 #endif
     address.sin_port = htons(port_num);
 
-    int status = connect(socket_fd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+    //int status = connect(socket_fd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+    int status = connect(socket_fd, (struct sockaddr*)&address, sizeof(address));
     
     if (status < 0) {
         cerr<< "socket connection failed" << endl;
@@ -310,18 +318,24 @@ void Socket::sendThread(int port_num){
     }
 
     // add socket_fd to list of socket that needs to be closed at end of program
-    socket_connection.push_back(socket_fd);
+    //socket_connection.push_back(socket_fd);
     
     string message;
+    mutex locker;
+    string thread_status = "";
+    //while(thread_status != "done" )
     while(1){
         std::unique_lock<mutex> ul(locker);
-        cv.wait(ul, [this]() {return !messageQueue.empty();});
-    
-        message = messageQueue.front();
+        cv.wait(ul, [this, port_num]() {return !port_to_queue[port_num].empty();});
+
+        message = port_to_queue[port_num].front();
         cout << "Sending:    " << message << endl;    
         send(socket_fd, message.c_str(), message.size(), 0);
-        messageQueue.erase(messageQueue.begin());
+        port_to_queue[port_num].erase(port_to_queue[port_num].begin());
+        //thread_status = parseThreadStatus(message);
     }
+
+    //close(socket_fd);
 }
 
 // this method connects to a pre-exsiting socket
@@ -329,13 +343,30 @@ void Socket::sendThread(int port_num){
 void Socket::connectTo(int port_num){
     thread thr(&Socket::sendThread, this, port_num);
     thr.detach();
+    port_to_queue[port_num] = vector<string>();
 }
 
+/*void Socket::waitForThreads(){
+  this->controller_stop = true;
+  mutex locker;
+  std::unique_lock<mutex> ul(locker);
+  thread_wait_cv.wait(ul, [this]() {return this->controller_stop == false;});
+  cout << "Leaving" << endl;
+
+} */
+
 // adds message to message queue and notifies sendThread
-void Socket::sendMessage(string message){
+void Socket::sendMessage(string message, int port_num){
+    mutex locker;
     locker.lock();
-    messageQueue.push_back(message);
-    cv.notify_one();
+    /*
+    if(this->type == "controller" && (message.find("start reducer:") != std::string::npos || message.find("start mapper:") != std::string::npos)){
+      // Add to thread count 
+      this->controller_thread_count += convertStringToVector(message).size();
+      cout << "Thread Count: " << this->controller_thread_count << endl;
+    } */
+    port_to_queue[port_num].push_back(message);
+    cv.notify_all();
     locker.unlock();
 }
 
@@ -352,13 +383,7 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
         exit(1);
     }
     
-    // create a list of activation message
-    string controller_msg1 = "done map";
-    string controller_msg2 = "done reduce";
-    string stub_msg = "start stub";
-    string stub_msg2 = "stop stub";
     
-    // listens for message, then execute functionality based on message receieved
     while(1){
         char buffer[1024];
         int valread = read(new_socket_fd, buffer, sizeof(buffer));
@@ -368,8 +393,6 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
                 if(str_buf.find("start mapper:") != std::string::npos){
                     // message from controller "start mapper:0,1,2,3    
                     vector<int> thread_id = convertStringToVector(str_buf);
-                    
-                    cout << thread_id[0] << endl;
 
                     std::vector<std::thread> mapThreads(thread_id.size());
                     // Start each thread
@@ -402,16 +425,30 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
                 }
             }
             else if(this->type == "controller"){
-                
-                if(str_buf.find("Thread(") != std::string::npos){
-                    int thread_num = parseThreadNum(str_buf);
-                    string thread_status = parseThreadStatus(str_buf);
-                    if(thread_status == "done"){
-                        // set the done value in workflow
-                        cout << "Thread " << thread_num << ": is done" <<endl;
-                    }
-                }   
+              if(str_buf.find("Thread(") != std::string::npos){
+                int thread_num = parseThreadNum(str_buf);
+                string thread_status = parseThreadStatus(str_buf);
+                  
+                if(thread_status == "done"){
+                  // set the done value in workflow
+                  cout << "Thread " << thread_num << ": is done" <<endl;
+                  // decrement thread count
+                  /*
+                  this->controller_thread_count -= 1;
+
+                  cout << "Thread count left: " << controller_thread_count << endl;
+                    // if all thread ran resume controller's execution
+                    if(this->controller_thread_count == 0){
+                      this->controller_stop = false;
+                      thread_wait_cv.notify_all();
+                    }*/
+                }
+                // else if threads are still running stop controller's execution
+                else if(thread_status == "running"){
+                  //this->controller_stop = true;
+                }
+              }   
             }
-        }
-    }    
+          }
+      }    
 }
