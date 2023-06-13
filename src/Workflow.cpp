@@ -61,11 +61,13 @@ void Workflow::start() {
 
   Socket controller("controller", "", "", "", "", "");
 
-  controller.listenTo(controller_port, procNum);
+  controller.listenTo(controller_port, procNum*3);
+
+  int stub1_port = 3080;
 
   Socket stub1("stub", mapDllPath, reduceDllPath, inputReduceDir, tempDir, tempMapOutputFilePath);
   //Socket stub2("stub", mapDllPath, reduceDllPath, inputReduceDir, tempDir, tempMapOutputFilePath);
-  stub1.listenTo(8080, 1);
+  stub1.listenTo(stub1_port, 1);
   //stub2.listenTo(8082, 1);
   
 
@@ -81,15 +83,20 @@ void Workflow::start() {
     }
   }
 
-  controller.connectTo(8080);
+  controller.connectTo(stub1_port);
 
-  controller.sendMessage("start mapper:0,1,2,3,4,5,6,7,8,9", 8080); // port 8080
-  //std::this_thread::sleep_for(std::chrono::milliseconds(7000));
+  controller.sendMessage("start mapper:0,1,2", stub1_port); // port 8080
+  //controller.sendMessage("start mapper:0", stub1_port); // port 8080
+
+  controller.getPortToQ();
+  std::this_thread::sleep_for(std::chrono::milliseconds(7000));
   //controller.waitForThreads();
   
-  controller.sendMessage("start reducer:0,1,2,3,4,5,6,7,8,9", 8080); // port 8080
+  controller.sendMessage("start reducer:0,1,2", stub1_port); // port 8080
+  //controller.sendMessage("start reducer:0", stub1_port); // port 8080
+
   std::this_thread::sleep_for(std::chrono::milliseconds(7000));
-  controller.sendMessage("do not do anything please", 8080); // port 8080
+  controller.sendMessage("do not do anything please", stub1_port); // port 8080
   
 
 

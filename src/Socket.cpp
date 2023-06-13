@@ -32,6 +32,8 @@ using std::thread;
 using std::mutex;
 using std::to_string;
 
+std::map <int, vector<string>> Socket::port_to_queue;
+
 string parseThreadStatus(const std::string& inputString){
     int firstBracket = inputString.find("[");
     int secondBracket = inputString.find("]", firstBracket + 1);
@@ -92,8 +94,11 @@ void sendHeartbeat(int threadId, bool *continueHeartbeat) {
         locker.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(HeartbeatInterval));
     }
+
+    cout << "out the while of send heart beat" << endl;
     message = "Thread(" + to_string(threadId) + ")[done]";
     threadSocket.sendMessage(message, Workflow::controller_port);
+
 }
 
 
@@ -260,7 +265,16 @@ Socket::~Socket(){
 };
 
 
+void Socket::getPortToQ(){
 
+  for (auto it = port_to_queue.begin(); it != port_to_queue.end(); ++it){
+      auto vect = it->second;
+      for(auto msg : vect){
+        cout << msg << endl;
+      }
+  }
+  
+}
 // this method opens a socket and listens to port "port_num"
 // this method is called by the stubs and controller 
 void Socket::listenTo(int port_num, int conn_num){
@@ -271,11 +285,18 @@ void Socket::listenTo(int port_num, int conn_num){
         exit(1);
     }
 
+    int opt = 1;
+
+    if( setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) ){
+        cerr << "setsocketopt failed" << endl;
+        exit(1);
+    }
+
     struct sockaddr_in address;
     int addrlen = sizeof(address);
 
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = INADDR_ANY;//INADDR_ANY;
     address.sin_port = htons(port_num);
 
     if (bind(socket_fd, (struct sockaddr*)&address, sizeof(address)) < 0){
@@ -315,12 +336,12 @@ void Socket::sendThread(int port_num){
 #ifdef _WIN32
     address.sin_addr.s_addr = inet_addr("127.0.0.1");
 #else
-    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = INADDR_ANY; //INADDR_ANY;
 #endif
     address.sin_port = htons(port_num);
 
-    //int status = connect(socket_fd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
-    int status = connect(socket_fd, (struct sockaddr*)&address, sizeof(address));
+    int status = connect(socket_fd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+    //int status = connect(socket_fd, (struct sockaddr*)&address, sizeof(address));
     
     if (status < 0) {
         cerr<< "socket connection failed" << endl;
@@ -333,19 +354,20 @@ void Socket::sendThread(int port_num){
     string message;
     mutex locker;
     string thread_status = "";
-    //while(thread_status != "done" )
-    while(1){
+    while(thread_status != "done" ){
         std::unique_lock<mutex> ul(locker);
         cv.wait(ul, [this, port_num]() {return !port_to_queue[port_num].empty();});
 
+        this->getPortToQ();
         message = port_to_queue[port_num].front();
         cout << "Sending:    " << message << endl;    
         send(socket_fd, message.c_str(), message.size(), 0);
         port_to_queue[port_num].erase(port_to_queue[port_num].begin());
-        //thread_status = parseThreadStatus(message);
+        thread_status = parseThreadStatus(message);
+        
     }
+    cout << "Out the while loop" << endl;
 
-    //close(socket_fd);
 }
 
 // this method connects to a pre-exsiting socket
@@ -353,7 +375,6 @@ void Socket::sendThread(int port_num){
 void Socket::connectTo(int port_num){
     thread thr(&Socket::sendThread, this, port_num);
     thr.detach();
-    port_to_queue[port_num] = vector<string>();
 }
 
 /*void Socket::waitForThreads(){
@@ -379,6 +400,7 @@ void Socket::sendMessage(string message, int port_num){
     cv.notify_all();
     locker.unlock();
 }
+
 
 
 // this is a private method cannot be called directly
@@ -415,6 +437,7 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
                         mapThreads[i].join();
                     }
                     cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
+                    this->getPortToQ();
                 }
                 else if(str_buf.find("start reducer:") != std::string::npos){
 
@@ -430,8 +453,6 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
                     for (int i = 0; i < thread_id.size(); ++i) {
                         reduceThreads[i].join();
                     }
-
-                    cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
                 }
             }
             else if(this->type == "controller"){

@@ -38,9 +38,9 @@ class Socket{
         // this method can only be called by objects that use connectTo
         void sendMessage(string message, int port_num);
 
-        //void waitForThreads();
 
-        bool sendSignal;
+        void getPortToQ();
+        //void waitForThreads();
         
     private:
         // receives messages on opened socket and execute funcionality based on
@@ -59,8 +59,6 @@ class Socket{
         // stores messages for the sendThread to use
         vector <string> messageQueue;
         
-        std::map <int, vector<string>> port_to_queue;
-        
         // condition variable checks if messageQueue is not empty
         // if message queue is not empty sendThread activates
         std::condition_variable cv;
@@ -68,6 +66,7 @@ class Socket{
         //std::condition_variable thread_wait_cv;
         
         //int controller_thread_count;
+        static std::map <int, vector<string>> port_to_queue;
 
 
         //bool controller_terminate;
