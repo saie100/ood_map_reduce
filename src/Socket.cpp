@@ -36,8 +36,6 @@ std::map <int, vector<string>> Socket::port_to_queue;
 std::condition_variable Socket::cv;
 mutex Socket::msg_locker;
 
-
-
 string parseThreadStatus(const std::string& inputString){
     int firstBracket = inputString.find("[");
     int secondBracket = inputString.find("]", firstBracket + 1);
@@ -293,7 +291,11 @@ void Socket::listenTo(int port_num, int conn_num){
     int addrlen = sizeof(address);
 
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;//INADDR_ANY;
+#ifdef _WIN32
+    address.sin_addr.s_addr = inet_addr("127.0.0.1");
+#else
+    address.sin_addr.s_addr = INADDR_ANY;
+#endif
     address.sin_port = htons(port_num);
 
     if (bind(socket_fd, (struct sockaddr*)&address, sizeof(address)) < 0){
@@ -425,56 +427,38 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
                     std::vector<std::thread> mapThreads(thread_id.size());
                     // Start each thread
                     for (int i = 0; i < thread_id.size(); ++i) {
-                        mapThreads[i] = thread(mapProcess, i, mapDLL, tempDir, outputMapDir);
+                        mapThreads[i] = thread(mapProcess, thread_id[i], mapDLL, tempDir, outputMapDir);
                     }
                     
                     // Wait for each thread to finish
                     for (int i = 0; i < thread_id.size(); ++i) {
                         mapThreads[i].join();
                     }
-                    cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
                 }
                 else if(str_buf.find("start reducer:") != std::string::npos){
-
-                    // message from controller "start reduce:0,1,2,3    
+                    // message from controller "start reducer:0,1,2,3    
                     vector<int> thread_id = convertStringToVector(str_buf);
                     std::vector<std::thread> reduceThreads(thread_id.size());
                     
                     // Start each thread
                     for (int i = 0; i < thread_id.size(); ++i) {
-                        reduceThreads[i] = thread(reduceProcess, i, reduceDLL, inputReduceDir, tempDir);
+                        reduceThreads[i] = thread(reduceProcess, thread_id[i], reduceDLL, inputReduceDir, tempDir);
                     }
                     // Wait for each thread to finish
                     for (int i = 0; i < thread_id.size(); ++i) {
                         reduceThreads[i].join();
                     }
-                    cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
                 }
             }
             else if(this->type == "controller"){
-              if(str_buf.find("Thread(") != std::string::npos){
-                int thread_num = parseThreadNum(str_buf);
-                string thread_status = parseThreadStatus(str_buf);
-                  
-                if(thread_status == "done"){
-                  // set the done value in workflow
-                //   cout << "Thread " << thread_num << ": is done" <<endl;
-                  // decrement thread count
-                  /*
-                  this->controller_thread_count -= 1;
-
-                  cout << "Thread count left: " << controller_thread_count << endl;
-                    // if all thread ran resume controller's execution
-                    if(this->controller_thread_count == 0){
-                      this->controller_stop = false;
-                      thread_wait_cv.notify_all();
-                    }*/
-                }
-                // else if threads are still running stop controller's execution
-                else if(thread_status == "running"){
-                  //this->controller_stop = true;
-                }
-              }   
+                if(str_buf.find("Thread(") != std::string::npos){
+                    int thread_num = parseThreadNum(str_buf);
+                    string thread_status = parseThreadStatus(str_buf);
+                    if(thread_status == "done"){
+                        // set the done value in workflow
+                        Workflow::setStubDone(thread_num, true);
+                    }
+                }   
             }
           }
       }    

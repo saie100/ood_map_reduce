@@ -5,8 +5,8 @@
 #include <map>
 #ifdef _WIN32
 #include <winsock2.h>
-#include <ws2tcpip.h>
 #include <windows.h>
+#include <ws2tcpip.h>
 #else
 #include <dlfcn.h>
 #include <netinet/in.h>
@@ -41,8 +41,6 @@ class Socket{
 
         void getPortToQ();
         //void waitForThreads();
-
-        static mutex msg_locker;
         
     private:
         // receives messages on opened socket and execute funcionality based on
@@ -69,7 +67,7 @@ class Socket{
         
         //int controller_thread_count;
         static std::map <int, vector<string>> port_to_queue;
-
+        static mutex msg_locker;
 
         //bool controller_terminate;
         //bool controller_stop;
