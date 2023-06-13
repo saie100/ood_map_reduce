@@ -85,19 +85,13 @@ void Workflow::start() {
 
   controller.connectTo(stub1_port);
 
-  controller.sendMessage("start mapper:0,1,2", stub1_port); // port 8080
-  //controller.sendMessage("start mapper:0", stub1_port); // port 8080
-
-  controller.getPortToQ();
+  controller.sendMessage("start mapper:0,1,2,3,4,5,6,7,8,9", stub1_port); // port 3080
   std::this_thread::sleep_for(std::chrono::milliseconds(7000));
-  //controller.waitForThreads();
   
-  controller.sendMessage("start reducer:0,1,2", stub1_port); // port 8080
-  //controller.sendMessage("start reducer:0", stub1_port); // port 8080
-
+  controller.sendMessage("start reducer:0,1,2,3,4,5,6,7,8,9", stub1_port); // port 3080
   std::this_thread::sleep_for(std::chrono::milliseconds(7000));
-  controller.sendMessage("do not do anything please", stub1_port); // port 8080
   
+  controller.sendMessage("do not do anything please", stub1_port); // port 3080
 
 
   string reduceTempDir = tempDir + "/reduce";

@@ -33,6 +33,10 @@ using std::mutex;
 using std::to_string;
 
 std::map <int, vector<string>> Socket::port_to_queue;
+std::condition_variable Socket::cv;
+mutex Socket::msg_locker;
+
+
 
 string parseThreadStatus(const std::string& inputString){
     int firstBracket = inputString.find("[");
@@ -352,22 +356,18 @@ void Socket::sendThread(int port_num){
     //socket_connection.push_back(socket_fd);
     
     string message;
-    mutex locker;
     string thread_status = "";
     while(thread_status != "done" ){
-        std::unique_lock<mutex> ul(locker);
+        std::unique_lock<mutex> ul(msg_locker);
         cv.wait(ul, [this, port_num]() {return !port_to_queue[port_num].empty();});
 
-        this->getPortToQ();
         message = port_to_queue[port_num].front();
         cout << "Sending:    " << message << endl;    
         send(socket_fd, message.c_str(), message.size(), 0);
         port_to_queue[port_num].erase(port_to_queue[port_num].begin());
-        thread_status = parseThreadStatus(message);
-        
+        thread_status = parseThreadStatus(message);   
     }
-    cout << "Out the while loop" << endl;
-
+    
 }
 
 // this method connects to a pre-exsiting socket
@@ -388,8 +388,7 @@ void Socket::connectTo(int port_num){
 
 // adds message to message queue and notifies sendThread
 void Socket::sendMessage(string message, int port_num){
-    mutex locker;
-    locker.lock();
+    msg_locker.lock();
     /*
     if(this->type == "controller" && (message.find("start reducer:") != std::string::npos || message.find("start mapper:") != std::string::npos)){
       // Add to thread count 
@@ -398,7 +397,7 @@ void Socket::sendMessage(string message, int port_num){
     } */
     port_to_queue[port_num].push_back(message);
     cv.notify_all();
-    locker.unlock();
+    msg_locker.unlock();
 }
 
 
@@ -437,7 +436,6 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
                         mapThreads[i].join();
                     }
                     cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
-                    this->getPortToQ();
                 }
                 else if(str_buf.find("start reducer:") != std::string::npos){
 

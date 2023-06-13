@@ -41,6 +41,8 @@ class Socket{
 
         void getPortToQ();
         //void waitForThreads();
+
+        static mutex msg_locker;
         
     private:
         // receives messages on opened socket and execute funcionality based on
@@ -61,7 +63,7 @@ class Socket{
         
         // condition variable checks if messageQueue is not empty
         // if message queue is not empty sendThread activates
-        std::condition_variable cv;
+        static std::condition_variable cv;
 
         //std::condition_variable thread_wait_cv;
         
