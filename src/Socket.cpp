@@ -99,9 +99,9 @@ void sendHeartbeat(int threadId, bool *continueHeartbeat) {
         std::this_thread::sleep_for(std::chrono::milliseconds(HeartbeatInterval));
     }
 
-    cout << "out the while of send heart beat" << endl;
     message = "Thread(" + to_string(threadId) + ")[done]";
     threadSocket.sendMessage(message, Workflow::controller_port);
+    threadSocket.sendMessage("don't do anything more for thread " + to_string(threadId) + " please", Workflow::controller_port);
 
 }
 
@@ -289,13 +289,6 @@ void Socket::listenTo(int port_num, int conn_num){
         exit(1);
     }
 
-    int opt = 1;
-
-    if( setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) ){
-        cerr << "setsocketopt failed" << endl;
-        exit(1);
-    }
-
     struct sockaddr_in address;
     int addrlen = sizeof(address);
 
@@ -414,10 +407,14 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
         exit(1);
     }
     
-    
     while(1){
         char buffer[1024];
-        int valread = read(new_socket_fd, buffer, sizeof(buffer));
+        int valread;
+        #ifdef _WIN32
+        valread = recv(new_socket_fd, buffer, sizeof(buffer), 0);
+        #else
+        valread = read(new_socket_fd, buffer, sizeof(buffer));
+        #endif
         if(valread){
             string str_buf = string(buffer);
             if(this->type == "stub"){
@@ -451,6 +448,7 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
                     for (int i = 0; i < thread_id.size(); ++i) {
                         reduceThreads[i].join();
                     }
+                    cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
                 }
             }
             else if(this->type == "controller"){
@@ -460,7 +458,7 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
                   
                 if(thread_status == "done"){
                   // set the done value in workflow
-                  cout << "Thread " << thread_num << ": is done" <<endl;
+                //   cout << "Thread " << thread_num << ": is done" <<endl;
                   // decrement thread count
                   /*
                   this->controller_thread_count -= 1;

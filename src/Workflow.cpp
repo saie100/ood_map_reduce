@@ -96,8 +96,6 @@ void Workflow::start() {
 
   string reduceTempDir = tempDir + "/reduce";
 
-  cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
-
 #ifdef _WIN32
 // use reduce dll to sort and reduce
 if (reduceDLL != NULL) {
