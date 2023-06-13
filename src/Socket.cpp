@@ -15,9 +15,7 @@
 #include "headers/FileManager.h"
 #include "headers/Workflow.h"
  
-#ifdef _WIN32
-#include <windows.h>
-#else
+#ifndef _WIN32
 #include <dlfcn.h>
 #endif
 
@@ -73,29 +71,36 @@ std::vector<int> convertStringToVector(const std::string& inputString) {
     return outputVector;
 }
 
-// Define the heartbeat interval in seconds (e.g., 5 seconds)
-constexpr int HeartbeatInterval = 5;
+// Define the heartbeat interval in seconds (e.g., 100 milliseconds)
+constexpr int HeartbeatInterval = 100;
+mutex locker;
 
-/*void sendHeartbeat(int threadId, bool *continueHeartbeat) {
+void sendHeartbeat(int threadId, bool *continueHeartbeat) {
     
     Socket threadSocket("thread", "", "", "", "", "");
     threadSocket.connectTo(Workflow::controller_port);
     string message = "";
-    while (*continueHeartbeat) {
+    while (true) {
         // Send heartbeat message to the controller indicating the current status
         message = "Thread(" + to_string(threadId) + ")[running]";
         threadSocket.sendMessage(message, Workflow::controller_port);
-        std::this_thread::sleep_for(std::chrono::seconds(HeartbeatInterval));
+        locker.lock();
+        if(!*continueHeartbeat) {
+            locker.unlock();
+            break;
+        }
+        locker.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(HeartbeatInterval));
     }
     message = "Thread(" + to_string(threadId) + ")[done]";
     threadSocket.sendMessage(message, Workflow::controller_port);
 }
-*/
+
 
 void mapProcess(int threadId, string mapDllPath, string inputDir, string outputFilePath) {
 
   bool continueHeartbeat = true;
-  //thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
+  thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
 
 #ifdef _WIN32
   // create DLL handles
@@ -149,17 +154,20 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
 #endif
     }
   }
+
+  locker.lock();
   continueHeartbeat = false;
+  locker.unlock();
 
   // Wait for the heartbeat thread to finish
-  //heartbeatThread.join();
+  heartbeatThread.join();
 }
 
 
 void reduceProcess(int threadId, string reduceDllPath, string inputDir, string tempDir) {
 
   bool continueHeartbeat = true;
-  //thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
+  thread heartbeatThread(sendHeartbeat, threadId, &continueHeartbeat);
 
   #ifdef _WIN32
     // create DLL handles
@@ -212,10 +220,12 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string t
     }
   }
 
+  locker.lock();
   continueHeartbeat = false;
+  locker.unlock();
 
   // Wait for the heartbeat thread to finish
-  //heartbeatThread.join();
+  heartbeatThread.join();
 }
 
 // Socket class constructor
