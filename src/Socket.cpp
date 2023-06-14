@@ -242,9 +242,6 @@ Socket::Socket(string type, string mapDLL, string reduceDLL, string inputReduceD
     this->inputReduceDir = inputReduceDir;
     this->tempDir = tempDir;
     this->outputMapDir = outputMapDir;
-    //this->controller_stop = true;
-    //this->controller_terminate = false;
-    //this->controller_thread_count = 0;
     
 #ifdef _WIN32
     WSADATA wsaData;
@@ -261,7 +258,8 @@ Socket::~Socket(){
         close(socket);
     }
 #ifdef _WIN32
-    WSACleanup(); // Clean up the Winsock library
+    // Clean up the Winsock library
+    WSACleanup();
 #endif
 };
 
@@ -280,6 +278,7 @@ void Socket::getPortToQ(){
   }
   
 }
+
 // this method opens a socket and listens to port "port_num"
 // this method is called by the stubs and controller 
 void Socket::listenTo(int port_num, int conn_num){
@@ -349,9 +348,6 @@ void Socket::sendThread(int port_num){
         cerr<< "socket connection failed" << endl;
         exit(1);
     }
-
-    // add socket_fd to list of socket that needs to be closed at end of program
-    //socket_connection.push_back(socket_fd);
     
     string message;
     string thread_status = "";
@@ -375,24 +371,9 @@ void Socket::connectTo(int port_num){
     thr.detach();
 }
 
-/*void Socket::waitForThreads(){
-  this->controller_stop = true;
-  mutex locker;
-  std::unique_lock<mutex> ul(locker);
-  thread_wait_cv.wait(ul, [this]() {return this->controller_stop == false;});
-  cout << "Leaving" << endl;
-
-} */
-
 // adds message to message queue and notifies sendThread
 void Socket::sendMessage(string message, int port_num){
     msg_locker.lock();
-    /*
-    if(this->type == "controller" && (message.find("start reducer:") != std::string::npos || message.find("start mapper:") != std::string::npos)){
-      // Add to thread count 
-      this->controller_thread_count += convertStringToVector(message).size();
-      cout << "Thread Count: " << this->controller_thread_count << endl;
-    } */
     port_to_queue[port_num].push_back(message);
     cv.notify_all();
     msg_locker.unlock();

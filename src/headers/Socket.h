@@ -42,7 +42,6 @@ class Socket{
         static void setStopListening();
 
         void getPortToQ();
-        //void waitForThreads();
         
     private:
         // receives messages on opened socket and execute funcionality based on
@@ -64,15 +63,8 @@ class Socket{
         // condition variable checks if messageQueue is not empty
         // if message queue is not empty sendThread activates
         static std::condition_variable cv;
-
-        //std::condition_variable thread_wait_cv;
-        
-        //int controller_thread_count;
         static std::map <int, vector<string>> port_to_queue;
         static mutex msg_locker;
-
-        //bool controller_terminate;
-        //bool controller_stop;
 
         string mapDLL;
         string reduceDLL;
@@ -80,6 +72,4 @@ class Socket{
         string tempDir;
         string outputMapDir;
         static bool stopListening;
-        
-        
 };
