@@ -356,7 +356,6 @@ void Socket::sendThread(int port_num){
         cv.wait(ul, [this, port_num]() {return !port_to_queue[port_num].empty();});
 
         message = port_to_queue[port_num].front();
-        cout << "Sending:    " << message << endl;    
         send(socket_fd, message.c_str(), message.size(), 0);
         port_to_queue[port_num].erase(port_to_queue[port_num].begin());
         thread_status = parseThreadStatus(message);   
