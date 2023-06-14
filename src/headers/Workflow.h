@@ -10,10 +10,32 @@
 #define WORKFLOW_H
 
 #include <string>
+#include <vector>
+#include <mutex>
 
 using std::string;
+using std::vector;
+using std::mutex;
 
 class Workflow{
+    public:
+        using ThreadStatus = struct {
+            int threadId;
+            bool done;
+        };
+
+        using Stub = struct {
+            int port_num;
+            vector<ThreadStatus> threads;
+        };
+
+        static const int controller_port = 9000;
+
+        Workflow(string input_dir, string temp_dir, string output_dir, string reduce_dll_path, string map_dll_path, int proc_num);
+        void start();
+        static void resetStubs();
+        static void setStubDone(int threadId, bool done);
+        static bool stubsAreDone();
 
     private:
         string inputDir;
@@ -22,11 +44,11 @@ class Workflow{
         string reduceDllPath;
         string mapDllPath;
         int procNum;
-
-    public:
-        Workflow(string input_dir, string temp_dir, string output_dir, string reduce_dll_path, string map_dll_path, int proc_num);
-        // void mapProcess(int threadId);
-        void start();
+        static vector<Stub> stubs;
+        static mutex stub_locker;
 };
 
 #endif
+
+
+

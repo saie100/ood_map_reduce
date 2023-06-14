@@ -16,8 +16,6 @@ using std::array;
 int main(int argc, char ** argv){
 
   Executive commandline(argc, argv);
-  FileManager::deleteFilesFromDir(commandline.getTempDir());
-  FileManager::deleteFilesFromDir(commandline.getOutputDir());
   
   Workflow wf(
     commandline.getInputDir(),

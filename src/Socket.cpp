@@ -13,6 +13,13 @@
 #include "headers/Socket.h"
 #include "headers/Executive.h"
 #include "headers/FileManager.h"
+#include "headers/Workflow.h"
+ 
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
+
+#include "headers/FileManager.h"
 #include "headers/Sort.h"
 
 using std::string;
@@ -25,6 +32,23 @@ using std::thread;
 using std::mutex;
 using std::to_string;
 
+std::map <int, vector<string>> Socket::port_to_queue;
+std::condition_variable Socket::cv;
+mutex Socket::msg_locker;
+bool Socket::stopListening = false;
+
+string parseThreadStatus(const std::string& inputString){
+    int firstBracket = inputString.find("[");
+    int secondBracket = inputString.find("]", firstBracket + 1);
+    string threadStatus = inputString.substr(firstBracket + 1, secondBracket - firstBracket - 1);
+    return threadStatus;
+}
+int parseThreadNum(const std::string& inputString) {
+    int firstParenthesis = inputString.find("(");
+    int secondParenthesis = inputString.find(")", firstParenthesis + 1);
+    string threadNum = inputString.substr(firstParenthesis + 1, secondParenthesis - firstParenthesis - 1);
+    return std::stoi(threadNum);
+}
 #ifdef _WIN32
 typedef void (*funcMap)(const string&, const string&, const string&);
 typedef void (*funcReduce)(string, string);
@@ -52,16 +76,30 @@ std::vector<int> convertStringToVector(const std::string& inputString) {
     return outputVector;
 }
 
-// Define the heartbeat interval in seconds (e.g., 5 seconds)
-constexpr int HeartbeatInterval = 5;
+// Define the heartbeat interval in seconds (e.g., 100 milliseconds)
+constexpr int HeartbeatInterval = 100;
+mutex locker;
 
 void sendHeartbeat(int threadId, bool *continueHeartbeat) {
-    while (*continueHeartbeat) {
+    
+    Socket threadSocket("thread", "", "", "", "", "");
+    threadSocket.connectTo(Workflow::controller_port);
+    string message = "";
+    while (true) {
         // Send heartbeat message to the controller indicating the current status
-        cout << "Thread " << threadId << " is still running...\n";
-        std::this_thread::sleep_for(std::chrono::seconds(HeartbeatInterval));
+        message = "Thread(" + to_string(threadId) + ")[running]";
+        threadSocket.sendMessage(message, Workflow::controller_port);
+        locker.lock();
+        if(!*continueHeartbeat) {
+            locker.unlock();
+            break;
+        }
+        locker.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(HeartbeatInterval));
     }
-    cout << "Thread " << threadId << " finished running! \n";
+
+    message = "Thread(" + to_string(threadId) + ")[done]";
+    threadSocket.sendMessage(message, Workflow::controller_port);
 }
 
 
@@ -122,7 +160,10 @@ void mapProcess(int threadId, string mapDllPath, string inputDir, string outputF
 #endif
     }
   }
+
+  locker.lock();
   continueHeartbeat = false;
+  locker.unlock();
 
   // Wait for the heartbeat thread to finish
   heartbeatThread.join();
@@ -185,7 +226,9 @@ void reduceProcess(int threadId, string reduceDllPath, string inputDir, string t
     }
   }
 
+  locker.lock();
   continueHeartbeat = false;
+  locker.unlock();
 
   // Wait for the heartbeat thread to finish
   heartbeatThread.join();
@@ -199,6 +242,7 @@ Socket::Socket(string type, string mapDLL, string reduceDLL, string inputReduceD
     this->inputReduceDir = inputReduceDir;
     this->tempDir = tempDir;
     this->outputMapDir = outputMapDir;
+    
 #ifdef _WIN32
     WSADATA wsaData;
     WORD versionRequested = MAKEWORD(2, 2);
@@ -207,15 +251,33 @@ Socket::Socket(string type, string mapDLL, string reduceDLL, string inputReduceD
 };
 
 // Socket class destructor
+
 Socket::~Socket(){
     // close all opened sockets
     for(int socket : socket_connection){
         close(socket);
     }
 #ifdef _WIN32
-    WSACleanup(); // Clean up the Winsock library
+    // Clean up the Winsock library
+    WSACleanup();
 #endif
 };
+
+// set the flag to kill all the listening threads
+void Socket::setStopListening() {
+    stopListening = true;
+}
+
+void Socket::getPortToQ(){
+
+  for (auto it = port_to_queue.begin(); it != port_to_queue.end(); ++it){
+      auto vect = it->second;
+      for(auto msg : vect){
+        cout << msg << endl;
+      }
+  }
+  
+}
 
 // this method opens a socket and listens to port "port_num"
 // this method is called by the stubs and controller 
@@ -231,7 +293,11 @@ void Socket::listenTo(int port_num, int conn_num){
     int addrlen = sizeof(address);
 
     address.sin_family = AF_INET;
+#ifdef _WIN32
+    address.sin_addr.s_addr = inet_addr("127.0.0.1");
+#else
     address.sin_addr.s_addr = INADDR_ANY;
+#endif
     address.sin_port = htons(port_num);
 
     if (bind(socket_fd, (struct sockaddr*)&address, sizeof(address)) < 0){
@@ -271,30 +337,30 @@ void Socket::sendThread(int port_num){
 #ifdef _WIN32
     address.sin_addr.s_addr = inet_addr("127.0.0.1");
 #else
-    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = INADDR_ANY; //INADDR_ANY;
 #endif
     address.sin_port = htons(port_num);
 
     int status = connect(socket_fd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+    //int status = connect(socket_fd, (struct sockaddr*)&address, sizeof(address));
     
     if (status < 0) {
         cerr<< "socket connection failed" << endl;
         exit(1);
     }
-
-    // add socket_fd to list of socket that needs to be closed at end of program
-    socket_connection.push_back(socket_fd);
     
     string message;
-    while(1){
-        std::unique_lock<mutex> ul(locker);
-        cv.wait(ul, [this]() {return !messageQueue.empty();});
-    
-        message = messageQueue.front();
-        cout << "Sending:    " << message << endl;    
+    string thread_status = "";
+    while(thread_status != "done"){
+        std::unique_lock<mutex> ul(msg_locker);
+        cv.wait(ul, [this, port_num]() {return !port_to_queue[port_num].empty();});
+
+        message = port_to_queue[port_num].front();
         send(socket_fd, message.c_str(), message.size(), 0);
-        messageQueue.erase(messageQueue.begin());
+        port_to_queue[port_num].erase(port_to_queue[port_num].begin());
+        thread_status = parseThreadStatus(message);   
     }
+    
 }
 
 // this method connects to a pre-exsiting socket
@@ -305,12 +371,13 @@ void Socket::connectTo(int port_num){
 }
 
 // adds message to message queue and notifies sendThread
-void Socket::sendMessage(string message){
-    locker.lock();
-    messageQueue.push_back(message);
-    cv.notify_one();
-    locker.unlock();
+void Socket::sendMessage(string message, int port_num){
+    msg_locker.lock();
+    port_to_queue[port_num].push_back(message);
+    cv.notify_all();
+    msg_locker.unlock();
 }
+
 
 
 // this is a private method cannot be called directly
@@ -325,63 +392,61 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
         exit(1);
     }
     
-    // create a list of activation message
-    string controller_msg1 = "done map";
-    string controller_msg2 = "done reduce";
-    string stub_msg = "start stub";
-    string stub_msg2 = "stop stub";
-    
-    // listens for message, then execute functionality based on message receieved
     while(1){
-        
         char buffer[1024];
-        int valread = read(new_socket_fd, buffer, sizeof(buffer));
-        string str_buf = string(buffer);
-        if(this->type == "stub"){
-            if(str_buf.find("start mapper:") != std::string::npos){
-                // message from controller "start mapper:0,1,2,3    
-                vector<int> thread_id = convertStringToVector(str_buf);
-                
-                cout << thread_id[0] << endl;
+        int valread;
+        #ifdef _WIN32
+        valread = recv(new_socket_fd, buffer, sizeof(buffer), 0);
+        #else
+        valread = read(new_socket_fd, buffer, sizeof(buffer));
+        #endif
+        if(valread){
+            string str_buf = string(buffer);
+            if(this->type == "stub"){
+                if(str_buf.find("start mapper:") != std::string::npos){
+                    // message from controller "start mapper:0,1,2,3    
+                    vector<int> thread_id = convertStringToVector(str_buf);
 
-                std::vector<std::thread> mapThreads(thread_id.size());
-                // Start each thread
-                for (int i = 0; i < thread_id.size(); ++i) {
-                    mapThreads[i] = thread(mapProcess, i, mapDLL, tempDir, outputMapDir);
+                    std::vector<std::thread> mapThreads(thread_id.size());
+                    // Start each thread
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        mapThreads[i] = thread(mapProcess, thread_id[i], mapDLL, tempDir, outputMapDir);
+                    }
+                    
+                    // Wait for each thread to finish
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        mapThreads[i].join();
+                    }
                 }
-                
-                // Wait for each thread to finish
-                for (int i = 0; i < thread_id.size(); ++i) {
-                    mapThreads[i].join();
+                else if(str_buf.find("start reducer:") != std::string::npos){
+                    // message from controller "start reducer:0,1,2,3    
+                    vector<int> thread_id = convertStringToVector(str_buf);
+                    std::vector<std::thread> reduceThreads(thread_id.size());
+                    
+                    // Start each thread
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        reduceThreads[i] = thread(reduceProcess, thread_id[i], reduceDLL, inputReduceDir, tempDir);
+                    }
+                    // Wait for each thread to finish
+                    for (int i = 0; i < thread_id.size(); ++i) {
+                        reduceThreads[i].join();
+                    }
                 }
-                cout << "Mapping complete!\n" << "Sorting and aggregating map output..." << endl;
             }
-            else if(str_buf.find("start reducer:") != std::string::npos){
+            else if(this->type == "controller"){
+                if(str_buf.find("Thread(") != std::string::npos){
+                    int thread_num = parseThreadNum(str_buf);
+                    string thread_status = parseThreadStatus(str_buf);
+                    if(thread_status == "done"){
+                        // set the done value in workflow
+                        Workflow::setStubDone(thread_num, true);
+                    }
+                }
+            }
+          }
 
-                // message from controller "start reduce:0,1,2,3    
-                vector<int> thread_id = convertStringToVector(str_buf);
-                std::vector<std::thread> reduceThreads(thread_id.size());
-                
-                // Start each thread
-                for (int i = 0; i < thread_id.size(); ++i) {
-                    reduceThreads[i] = thread(reduceProcess, i, reduceDLL, inputReduceDir, tempDir);
-                }
-                // Wait for each thread to finish
-                for (int i = 0; i < thread_id.size(); ++i) {
-                    reduceThreads[i].join();
-                }
-
-                cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
-            }
-        }
-        else if(this->type == "controller"){
-            if(str_buf.find(controller_msg1) != std::string::npos){
-                cout << "Do something 1" << endl;
-            }
-            else if(str_buf.find(controller_msg2) != std::string::npos){
-                cout << "Do something 2" << endl;
-            }
-        }
-    }
+          if (stopListening) {
+            break;
+          }
+      }    
 }
-    

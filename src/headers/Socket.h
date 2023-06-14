@@ -2,10 +2,11 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <map>
 #ifdef _WIN32
 #include <winsock2.h>
-#include <ws2tcpip.h>
 #include <windows.h>
+#include <ws2tcpip.h>
 #else
 #include <dlfcn.h>
 #include <netinet/in.h>
@@ -35,9 +36,12 @@ class Socket{
             
         // sends message to the pre-established connection
         // this method can only be called by objects that use connectTo
-        void sendMessage(string message);
+        void sendMessage(string message, int port_num);
 
-        bool sendSignal;
+        // set the flag to kill all the listening threads
+        static void setStopListening();
+
+        void getPortToQ();
         
     private:
         // receives messages on opened socket and execute funcionality based on
@@ -52,21 +56,20 @@ class Socket{
 
         // store all socket connection for later deletion within destructor
         vector<int> socket_connection;
-        
-        mutex locker;
 
         // stores messages for the sendThread to use
         vector <string> messageQueue;
         
         // condition variable checks if messageQueue is not empty
         // if message queue is not empty sendThread activates
-        std::condition_variable cv;
+        static std::condition_variable cv;
+        static std::map <int, vector<string>> port_to_queue;
+        static mutex msg_locker;
 
         string mapDLL;
         string reduceDLL;
         string inputReduceDir;
         string tempDir;
         string outputMapDir;
-        
-        
+        static bool stopListening;
 };
