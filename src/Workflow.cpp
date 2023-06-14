@@ -115,7 +115,7 @@ void Workflow::start() {
   }
   stub_locker.unlock();
 
-  cout << "Mapping input files..." << endl;
+  cout << "Partitioning input files..." << endl;
   for (string inputFilePath : inputFilePaths) {
     vector<array<string, 2>> inputFile = fm.partitionFile(inputFilePath, procNum);
     for (array<string, 2> partition : inputFile) {
