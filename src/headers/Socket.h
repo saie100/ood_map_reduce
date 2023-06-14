@@ -38,6 +38,8 @@ class Socket{
         // this method can only be called by objects that use connectTo
         void sendMessage(string message, int port_num);
 
+        // set the flag to kill all the listening threads
+        static void setStopListening();
 
         void getPortToQ();
         //void waitForThreads();
@@ -77,6 +79,7 @@ class Socket{
         string inputReduceDir;
         string tempDir;
         string outputMapDir;
+        static bool stopListening;
         
         
 };

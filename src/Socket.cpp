@@ -35,6 +35,7 @@ using std::to_string;
 std::map <int, vector<string>> Socket::port_to_queue;
 std::condition_variable Socket::cv;
 mutex Socket::msg_locker;
+bool Socket::stopListening = false;
 
 string parseThreadStatus(const std::string& inputString){
     int firstBracket = inputString.find("[");
@@ -99,8 +100,6 @@ void sendHeartbeat(int threadId, bool *continueHeartbeat) {
 
     message = "Thread(" + to_string(threadId) + ")[done]";
     threadSocket.sendMessage(message, Workflow::controller_port);
-    threadSocket.sendMessage("don't do anything more for thread " + to_string(threadId) + " please", Workflow::controller_port);
-
 }
 
 
@@ -266,6 +265,10 @@ Socket::~Socket(){
 #endif
 };
 
+// set the flag to kill all the listening threads
+void Socket::setStopListening() {
+    stopListening = true;
+}
 
 void Socket::getPortToQ(){
 
@@ -352,7 +355,7 @@ void Socket::sendThread(int port_num){
     
     string message;
     string thread_status = "";
-    while(thread_status != "done" ){
+    while(thread_status != "done"){
         std::unique_lock<mutex> ul(msg_locker);
         cv.wait(ul, [this, port_num]() {return !port_to_queue[port_num].empty();});
 
@@ -458,8 +461,12 @@ void Socket::listenThread(int socket_fd, sockaddr_in *address, int addrlen){
                         // set the done value in workflow
                         Workflow::setStubDone(thread_num, true);
                     }
-                }   
+                }
             }
+          }
+
+          if (stopListening) {
+            break;
           }
       }    
 }

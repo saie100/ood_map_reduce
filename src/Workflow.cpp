@@ -162,6 +162,9 @@ void Workflow::start() {
   while (!stubsAreDone()) {
     // empty loop until the stubs are all done
   }
+
+  // kill all the listening threads as communication is now complete
+  Socket::setStopListening();
   cout << "Sorting and aggregating complete!\n" << "Aggregating sorted output..." << endl;
 
   string reduceTempDir = tempDir + "/reduce";
