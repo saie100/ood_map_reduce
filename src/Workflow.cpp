@@ -126,6 +126,7 @@ void Workflow::start() {
         FileManager::writeFile(FileManager::MODE::APPEND, path, inputContent);
     }
   }
+  cout << "Partition complete.\n Mapping input files..." << endl;
 
   stub_locker.lock();
   // connect the controller to all the stubs
